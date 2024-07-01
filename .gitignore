@@ -1,0 +1,5 @@
+./paperspace_setup
+./output/model_extractions/*
+./output/models/*
+.idea
+.idea/*
