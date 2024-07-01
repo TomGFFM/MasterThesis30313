@@ -3,3 +3,5 @@
 ./output/models/*
 .idea
 .idea/*
+/paperspace_setup/*
+/output/models/*
