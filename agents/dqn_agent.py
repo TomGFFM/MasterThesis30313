@@ -40,7 +40,7 @@ class DeepQNetworkAgent:
         # Q-Network
         self.policy_net = self.DQN(**network_hyper_params).to(self.device)
         self.target_net = self.DQN(**network_hyper_params).to(self.device)
-        self.optimizer = optim.adamw(self.policy_net.parameters(), lr=self.learning_rate)
+        self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=self.learning_rate)
 
         # Replay memory
         self.memory = ReplayBuffer(self.replay_buffer_size, self.batch_size, self.device)
