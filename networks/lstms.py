@@ -64,7 +64,7 @@ class DDQAugmentedLSTMNN(nn.Module):
         self.advantage = nn.Sequential(
             nn.Linear(hidden_size, 512),
             nn.ReLU(),
-            nn.Dropout(0.2),
+            nn.Dropout(0.3),
             nn.Linear(512, self.num_actions)
         )
 
@@ -72,7 +72,7 @@ class DDQAugmentedLSTMNN(nn.Module):
         self.value = nn.Sequential(
             nn.Linear(hidden_size, 512),
             nn.ReLU(),
-            nn.Dropout(0.2),
+            nn.Dropout(0.3),
             nn.Linear(512, 1)
         )
 

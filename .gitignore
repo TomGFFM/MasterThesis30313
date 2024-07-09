@@ -5,3 +5,4 @@
 .idea/*
 /paperspace_setup/*
 /output/models/*
+/tracker.py

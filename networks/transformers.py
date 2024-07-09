@@ -62,7 +62,7 @@ class DDQAugmentedTransformerNN(nn.Module):
         self.advantage = nn.Sequential(
             nn.Linear(self.num_channels * self.seq_length, 512),
             nn.ReLU(),
-            nn.Dropout(0.2),
+            nn.Dropout(0.3),
             nn.Linear(512, self.num_actions)
         )
 
@@ -70,7 +70,7 @@ class DDQAugmentedTransformerNN(nn.Module):
         self.value = nn.Sequential(
             nn.Linear(self.num_channels * self.seq_length, 512),
             nn.ReLU(),
-            nn.Dropout(0.2),
+            nn.Dropout(0.3),
             nn.Linear(512, 1)
         )
 

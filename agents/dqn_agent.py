@@ -40,7 +40,7 @@ class DeepQNetworkAgent:
         # Q-Network
         self.policy_net = self.DQN(**network_hyper_params).to(self.device)
         self.target_net = self.DQN(**network_hyper_params).to(self.device)
-        self.optimizer = optim.RMSprop(self.policy_net.parameters(), lr=self.learning_rate)
+        self.optimizer = optim.adamw(self.policy_net.parameters(), lr=self.learning_rate)
 
         # Replay memory
         self.memory = ReplayBuffer(self.replay_buffer_size, self.batch_size, self.device)
@@ -136,7 +136,8 @@ class DeepQNetworkAgent:
         q_targets = rewards + (self.gamma * q_targets_next * (1 - terminations) * (1 - truncations))
 
         # Compute loss
-        loss = F.mse_loss(q_expected, q_targets)
+        # loss = F.mse_loss(q_expected, q_targets)
+        loss = F.smooth_l1_loss(q_expected, q_targets)
         logging.debug(f"Current loss: {loss}")
 
         # Minimize the loss

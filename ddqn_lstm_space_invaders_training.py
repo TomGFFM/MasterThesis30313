@@ -1,4 +1,5 @@
 # import standards
+import datetime
 import logging
 import os
 import pandas as pd
@@ -13,16 +14,20 @@ from networks import DDQAugmentedTransformerNN, DDQAugmentedLSTMNN
 from utils import FrameProcessor, AgentOptimizer
 
 # #####################################################
+# ################ output directory ###################
+# #####################################################
+# target output directory
+output_dir = './output'
+
+# #####################################################
 # ################ init logging #######################
 # #####################################################
+# logging.basicConfig(filename=output_dir + '/log_files/DDQAugmentedLSTMNN_training.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # #####################################################
 # ################ set device  ########################
 # #####################################################
-# set cuda env variables
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
-
 # Device for PyTorch (GPU or CPU)
 if torch.backends.mps.is_available():
     device = torch.device("mps")
@@ -37,8 +42,6 @@ logging.info(f"Device was set to: {device}")
 # #####################################################
 # ################ init gym environment ###############
 # #####################################################
-# target output directory
-output_dir = './output'
 
 # initialize the gym environment
 env = gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array")
@@ -47,11 +50,11 @@ env = gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array")
 # ################ init hyperparameter ################
 # #####################################################
 agent_hyper_params = {
-    "batch_size": 64,                       # size of each batch pushed through the network
+    "batch_size": 128,                       # size of each batch pushed through the network
     "action_size": env.action_space.n,      # number of allowed actions in game
     "epsilon_start": 0.99,                  # start value for epsilon
     "epsilon_end": 0.01,                    # lowest possible epsilon value
-    "epsilon_decay": 0.001,                 # factor by which epsilon gets reduced
+    "epsilon_decay": 0.0005,                 # factor by which epsilon gets reduced
     "gamma": 0.99,                          # tbd.
     "learn_start": 128,                     # tbd.
     "learning_rate": 0.0001,                # learning rate
@@ -69,7 +72,7 @@ network_hyper_params = {
     "hidden_size": 256,                     # size of hidden/cell state
     "num_layers": 6,                        # number of transformer encoding layers
     "conv_channels": [32, 64, 128, 256],    # convolutional channels for CNN picture extraction
-    "save_images": True,                    # save images from CNN layer (for testing only, keep false for normal training)
+    "save_images": False,                   # save images from CNN layer (for testing only, keep false for normal training)
     "output_dir": output_dir                # output directory for saving images (directory has to contain subfolder images)
 }
 

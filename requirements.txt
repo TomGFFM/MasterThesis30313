@@ -1,0 +1,12 @@
+fastparquet~=2024.2.0
+gym~=0.26.2
+numpy~=1.26.4
+matplotlib~=3.8.4
+matplotlib-inline~=0.1.7
+opencv-python~=4.9.0.80
+pandas~=2.2.2
+pillow~=10.3.0
+pyarrow~=16.0.0
+scipy~=1.13.0
+torch~=2.3.1
+torchvision~=0.18.1
