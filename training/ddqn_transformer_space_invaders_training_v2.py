@@ -63,11 +63,11 @@ agent_hyper_params = {
     "gamma": 0.99,                          # how much are future rewards valued
     "learn_start": 128,                     # number of rounds before the training starts
     "learning_rate": 0.0001,                # learning rate
-    "max_steps": 1500,                      # maximum actions to be taken within an episode
+    "max_steps": 2500,                      # maximum actions to be taken within an episode
     "replay_buffer_size": 100000,           # size of the replay buffer
     "tau": 0.001,                           # defines how fast the target network gets adjusted to the policy netw.
     "update_every": 1,                      # after how many steps gets the network updated
-    "update_target": 200,                   # threshold to start the replay
+    "update_target": 256,                   # threshold to start the replay
     "n_episodes": 20000                     # number of episodes to play for the agent
 }
 

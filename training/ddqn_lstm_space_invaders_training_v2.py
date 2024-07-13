@@ -47,7 +47,7 @@ env = gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array")
 # ################ init hyperparameter ################
 # #####################################################
 agent_hyper_params = {
-    "batch_size": 128,                      # size of each batch pushed through the network
+    "batch_size": 64,                       # size of each batch pushed through the network
     "action_size": env.action_space.n,      # number of allowed actions in game
     "epsilon_start": 0.99,                  # start value for epsilon
     "epsilon_end": 0.01,                    # lowest possible epsilon value
@@ -55,19 +55,19 @@ agent_hyper_params = {
     "gamma": 0.99,                          # how much are future rewards valued
     "learn_start": 128,                     # number of rounds before the training starts
     "learning_rate": 0.0001,                # learning rate
-    "max_steps": 1500,                      # maximum actions to be taken within an episode
+    "max_steps": 2500,                      # maximum actions to be taken within an episode
     "replay_buffer_size": 100000,           # size of the replay buffer
     "tau": 0.001,                           # defines how fast the target network gets adjusted to the policy netw.
     "update_every": 1,                      # after how many steps gets the network updated
-    "update_target": 200,                   # threshold to start the replay
-    "n_episodes": 15000                     # number of episodes to play for the agent
+    "update_target": 256,                   # threshold to start the replay
+    "n_episodes": 20000                     # number of episodes to play for the agent
 }
 
 network_hyper_params = {
     "input_shape": (4, 84, 84),             # desired shape of state pictures
     "num_actions": env.action_space.n,      # number of allowed actions in game
-    "hidden_size": 256,                     # size of hidden/cell state
-    "num_layers": 6,                        # number of transformer encoding layers
+    "hidden_size": 1024,                    # size of hidden/cell state
+    "num_layers": 12,                       # number of transformer encoding layers
     "conv_channels": [32, 64, 128, 256],    # convolutional channels for CNN picture extraction
     "save_images": False,                   # save images from CNN layer (for testing only, keep false for normal training)
     "output_dir": output_dir                # output directory for saving images (directory has to contain subfolder images)
