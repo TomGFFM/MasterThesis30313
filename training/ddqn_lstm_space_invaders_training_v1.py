@@ -1,8 +1,11 @@
 # import standards
-import datetime
 import logging
 import os
-import pandas as pd
+import sys
+
+# add project folder to path dynamically
+project_dir = os.path.dirname(os.getcwd())
+sys.path.append(project_dir)
 
 # import torch and gym
 import torch
@@ -10,7 +13,7 @@ import gym
 
 # import custom
 from agents import DeepQNetworkAgent
-from networks import DDQAugmentedTransformerNN, DDQAugmentedLSTMNN
+from networks import DDQAugmentedLSTMNN
 from utils import FrameProcessor, AgentOptimizer
 
 # #####################################################

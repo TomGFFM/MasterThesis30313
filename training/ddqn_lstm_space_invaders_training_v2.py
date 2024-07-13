@@ -1,5 +1,11 @@
 # import standards
 import logging
+import os
+import sys
+
+# add project folder to path dynamically
+project_dir = os.path.dirname(os.getcwd())
+sys.path.append(project_dir)
 
 # import torch and gym
 import torch
