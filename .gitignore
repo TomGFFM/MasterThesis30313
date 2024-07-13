@@ -1,9 +1,10 @@
-./paperspace_setup
+server_setup/*
 ./output/model_extractions/*
 ./output/models/*
 .idea
 .idea/*
-/paperspace_setup/*
+./server_setup/*
 /output/models/*
+/output/*
 /tracker.py
 /*.ipynb

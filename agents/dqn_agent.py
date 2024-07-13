@@ -176,13 +176,18 @@ class DeepQNetworkAgent:
         }
         torch.save(state, filepath)
 
-    def load(self, filepath: str) -> None:
+    def load(self, filepath: str, map_location: torch.device = None) -> None:
         """
         Load the policy network and optimizer state from a file.
 
         Args:
-            filepath (str): The path to load the state from.
+            :param filepath: The path to load the state from.
+            :param map_location: If set this parameter is used to set a new device location while loading the model
         """
-        state = torch.load(filepath)
+        if map_location:
+            state = torch.load(filepath, map_location=map_location)
+        else:
+            state = torch.load(filepath)
+
         self.policy_net.load_state_dict(state['policy_net'])
         self.optimizer.load_state_dict(state['optimizer'])
