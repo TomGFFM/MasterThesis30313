@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import random
 import logging
+import yaml
 
 from utils import ReplayBuffer
 from typing import Dict, Tuple, Union, Any
@@ -12,7 +13,8 @@ from typing import Dict, Tuple, Union, Any
 class DeepQNetworkAgent:
     """A DQN agent that interacts with and learns from the environment."""
 
-    def __init__(self, model: torch.nn.Module, action_size: int, device: torch.device, agent_hyper_params: Dict, network_hyper_params: Dict):
+    def __init__(self, model: torch.nn.Module, action_size: int, device: torch.device, agent_hyper_params: Dict,
+                 network_hyper_params: Dict, model_name: str = None):
 
         """
         Initialize an Agent object.
@@ -24,7 +26,11 @@ class DeepQNetworkAgent:
             agent_hyper_params (Dict): hyperparameters dictionary containing relevant settings for agent training etc.
             network_hyper_params (Dict): hyperparameters dictionary containing network specific settings
         """
+        # make hyperparam dicts available for property usage
+        self._agent_hyper_params = agent_hyper_params
+        self._network_hyper_params = network_hyper_params
 
+        # set relevant hyperparameter and model vars
         self.DQN = model
         self.action_size = action_size
         self.device = device
@@ -42,6 +48,11 @@ class DeepQNetworkAgent:
         self.target_net = self.DQN(**network_hyper_params).to(self.device)
         self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=self.learning_rate)
 
+        # Update model names if set from outside
+        if model_name:
+            self.policy_net.model_name = model_name
+            self.target_net.model_name = model_name
+
         # Replay memory
         self.memory = ReplayBuffer(self.replay_buffer_size, self.batch_size, self.device)
 
@@ -50,6 +61,14 @@ class DeepQNetworkAgent:
     @property
     def agent_model(self):
         return self.policy_net.model_name
+
+    @property
+    def agent_hyper_params(self):
+        return self._agent_hyper_params
+
+    @property
+    def network_hyper_params(self):
+        return self._network_hyper_params
 
     def step(self, state: np.ndarray, action: int, reward: float, next_state: np.ndarray, terminated: bool,
              truncated: bool) -> float:
@@ -159,7 +178,8 @@ class DeepQNetworkAgent:
             policy_model (torch.nn.Module): The policy Q-network.
             target_model (torch.nn.Module): The target Q-network.
         """
-        tau = self.tau * (1 - self.t_step / self.update_every)  # Decrease tau over time
+        # tau = self.tau * (1 - self.t_step / self.update_every)  # Decrease tau over time
+        tau = self.tau
         for target_param, policy_param in zip(target_model.parameters(), policy_model.parameters()):
             target_param.data.copy_(tau * policy_param.data + (1.0 - tau) * target_param.data)
 
@@ -170,6 +190,8 @@ class DeepQNetworkAgent:
         Args:
             filepath (str): The path to save the state to.
         """
+
+        # Save torch networks in filepath destination
         state = {
             'policy_net': self.policy_net.state_dict(),
             'optimizer': self.optimizer.state_dict()

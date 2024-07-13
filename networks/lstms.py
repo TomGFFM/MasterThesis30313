@@ -28,22 +28,13 @@ class DDQAugmentedLSTMNN(nn.Module):
                           Default: 'output'
     """
 
-    @property
-    def model_name(self):
-        """
-        Returns the name of the model.
-
-        Returns:
-            str: The name of the model.
-        """
-        return 'DDQAugmentedLSTMNN'
-
     def __init__(self, input_shape: tuple, num_actions, hidden_size=256, num_layers=2,
                  conv_channels: list = [32, 64, 128, 256], save_images: bool = False, output_dir: str = './output'):
         super(DDQAugmentedLSTMNN, self).__init__()
 
         self.input_shape = input_shape
         self.num_actions = num_actions
+        self._model_name = 'DDQAugmentedLSTMNN'
 
         # cnn layer for feature extraction
         self.cnnex = CNNExtractor(input_shape, conv_channels, save_images, output_dir)
@@ -75,6 +66,14 @@ class DDQAugmentedLSTMNN(nn.Module):
             nn.Dropout(0.3),
             nn.Linear(512, 1)
         )
+
+    @property
+    def model_name(self):
+        return self._model_name
+
+    @model_name.setter
+    def model_name(self, name: str):
+        self._model_name = name
 
     def forward(self, x):
         # extract features using CNN

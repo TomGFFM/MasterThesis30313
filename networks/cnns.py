@@ -251,6 +251,7 @@ class CNNExtractor(nn.Module):
         self.conv_channels = conv_channels
         self.save_images = save_images
         self.output_dir = output_dir + '/model_extractions'
+        self._model_name = 'CNNExtractor'
 
         # Define convolutional layers for feature extraction
         self.features = nn.Sequential(
@@ -274,13 +275,11 @@ class CNNExtractor(nn.Module):
 
     @property
     def model_name(self):
-        """
-        Returns the name of the model.
+        return self._model_name
 
-        Returns:
-            str: The name of the model.
-        """
-        return 'CNNExtractor'
+    @model_name.setter
+    def model_name(self, name: str):
+        self._model_name = name
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """

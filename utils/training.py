@@ -3,12 +3,11 @@ from datetime import datetime
 import math
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from collections import deque
 from utils import FrameProcessor
 import torch
 import logging
 from typing import List, Dict
+import yaml
 
 
 class AgentOptimizer:
@@ -152,6 +151,14 @@ class AgentOptimizer:
             # Save metrics to Parquet file
             df_metrics = pd.DataFrame(metrics_data)
             df_metrics.to_parquet(self.get_file_path(output_dir + '/metrics', 'metrics.pq'), index=False)
+
+            # Save agent hyperparameter configuration in filepath destination
+            with open(output_dir + f'/metrics/{self.agent.agent_model}_agent_hyper_params.yaml', 'w') as yaml_file:
+                yaml.dump(self.agent.agent_hyper_params, yaml_file, default_flow_style=False)
+
+            # Save network hyperparameter configuration in filepath destination
+            with open(output_dir + f'/metrics/{self.agent.agent_model}_network_hyper_params.yaml', 'w') as yaml_file:
+                yaml.dump(self.agent.network_hyper_params, yaml_file, default_flow_style=False)
 
         # Clear cache based on the device
         if self.device == torch.device("cuda"):

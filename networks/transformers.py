@@ -28,23 +28,13 @@ class DDQAugmentedTransformerNN(nn.Module):
         output_dir (str): The directory to save the output images from CNNExtractor.
                           Default: 'output'
     """
-
-    @property
-    def model_name(self):
-        """
-        Returns the name of the model.
-
-        Returns:
-            str: The name of the model.
-        """
-        return 'DDQAugmentedTransformerNN'
-
-    def __init__(self, input_shape: tuple, num_actions, num_heads=8, num_layers=6,
+    def __init__(self, input_shape: tuple, num_actions, num_heads=8, num_layers=6, size_linear_layers=512,
                  conv_channels: list = [32, 64, 128, 256], save_images: bool = False, output_dir: str = './output'):
         super(DDQAugmentedTransformerNN, self).__init__()
 
         self.input_shape = input_shape
         self.num_actions = num_actions
+        self._model_name = 'DDQAugmentedTransformerNN'
 
         # cnn layer for feature extraction
         self.cnnex = CNNExtractor(input_shape, conv_channels, save_images, output_dir)
@@ -60,19 +50,27 @@ class DDQAugmentedTransformerNN(nn.Module):
 
         # Define fully connected layers for advantage value computation
         self.advantage = nn.Sequential(
-            nn.Linear(self.num_channels * self.seq_length, 512),
+            nn.Linear(self.num_channels * self.seq_length, size_linear_layers),
             nn.ReLU(),
             nn.Dropout(0.3),
-            nn.Linear(512, self.num_actions)
+            nn.Linear(size_linear_layers, self.num_actions)
         )
 
         # Define fully connected layers for state value computation
         self.value = nn.Sequential(
-            nn.Linear(self.num_channels * self.seq_length, 512),
+            nn.Linear(self.num_channels * self.seq_length, size_linear_layers),
             nn.ReLU(),
             nn.Dropout(0.3),
-            nn.Linear(512, 1)
+            nn.Linear(size_linear_layers, 1)
         )
+
+    @property
+    def model_name(self):
+        return self._model_name
+
+    @model_name.setter
+    def model_name(self, name: str):
+        self._model_name = name
 
     def forward(self, x):
         # extract features using CNN
