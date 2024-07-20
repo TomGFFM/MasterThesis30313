@@ -1,1 +1,1 @@
-from .dqn_agent import DeepQNetworkAgent
+from .dqn_agent import DeepQNetworkAgent, DeepQNetworkAgentv2

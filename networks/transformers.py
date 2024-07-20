@@ -1,3 +1,5 @@
+import logging
+
 import torch
 import torch.nn as nn
 from networks import CNNExtractor
@@ -76,31 +78,46 @@ class DDQAugmentedTransformerNN(nn.Module):
         # extract features using CNN
         x = self.cnnex(x)
 
+        # Debugging-Ausgabe
+        logging.debug(f"Shape after CNN: {x.shape}")
+
         # get batch size
         batch_size = x.size(0)
 
+        # Calculate the correct seq_length based on the actual output shape of CNN
+        seq_length = x.size(2) * x.size(3)
+        logging.debug(f"Calculated seq_length: {seq_length}")
+
         # reshape the features to include sequence dimension
         x = x.view(batch_size, self.num_channels, self.seq_length)
+        logging.debug(f"Shape after view: {x.shape}")
         x = x.permute(0, 2, 1)
+        logging.debug(f"Shape after permute: {x.shape}")
 
         # process through each transformer encoder layer
         for encoder in self.transformer_encoders:
             x = encoder(x)
+            logging.debug(f"Shape after transformer encoder: {x.shape}")
 
         # remove the sequence dimension post transformer
         x = x.view(batch_size, -1)
+        logging.debug(f"Shape after view to remove sequence dimension: {x.shape}")
 
         # apply layer normalization
         x = nn.LayerNorm(x.size()[1:], elementwise_affine=False)(x)
+        logging.debug(f"Shape after layer normalization: {x.shape}")
 
         # compute advantage values
         advantage = self.advantage(x)
+        logging.debug(f"Shape after advantage calculation: {advantage.shape}")
 
         # compute state value
         value = self.value(x)
+        logging.debug(f"Shape after value calculation: {value.shape}")
 
         # combine advantage and value to get Q-values
         q_values = value + advantage - advantage.mean(dim=1, keepdim=True)
+        logging.debug(f"Shape of Q-values: {q_values.shape}")
 
         return q_values.squeeze()
 
@@ -119,8 +136,10 @@ class DDQAugmentedTransformerNN(nn.Module):
 
         # Pass the dummy input through the CNN
         dummy_output = self.cnnex(dummy_input)
+        logging.debug(f"Shape of dummy output: {dummy_output.shape}")
 
         # Calculate the sequence length based on the output shape
         seq_length = dummy_output.size(2) * dummy_output.size(3)
+        logging.debug(f"Calculated seq_length in calculate_seq_length: {seq_length}")  # Debugging-Ausgabe
 
         return seq_length

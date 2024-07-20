@@ -299,7 +299,7 @@ class CNNExtractor(nn.Module):
                 self.save_output_image(x, i)
         return x
 
-    def save_output_image(self, tensor: torch.Tensor, layer_index: int, save_every_x_images: int = 250000) -> None:
+    def save_output_image(self, tensor: torch.Tensor, layer_index: int, save_every_x_images: int = 10) -> None:
         """
         Saves the output images of a convolutional layer for a batch of samples.
 
