@@ -7,4 +7,5 @@ server_setup/*
 /output/models/*
 /output/*
 /tracker.py
-./plots/*.ipynb
+/plots/*.ipynb
+/plots/
