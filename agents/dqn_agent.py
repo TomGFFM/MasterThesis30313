@@ -277,7 +277,7 @@ class DeepQNetworkAgentv2:
         return self._network_hyper_params
 
     def step(self, state: np.ndarray, action: int, reward: float, next_state: np.ndarray, terminated: bool,
-             truncated: bool, previous_reward: float) -> float:
+             truncated: bool, previous_reward: float, previous_action: int) -> float:
         """
         Perform a single step of the agent's interaction with the environment.
 
@@ -289,6 +289,7 @@ class DeepQNetworkAgentv2:
             terminated (bool): Whether the episode has terminated.
             truncated (bool): Whether the episode has been truncated.
             previous_reward (float): The previous reward received by the agent.
+            previous_action (int): The previous action taken by the agent.
 
         Returns:
             loss(float): loss value from q values
@@ -297,8 +298,11 @@ class DeepQNetworkAgentv2:
         if reward > previous_reward:
             reward = self.reward_update(reward)
 
-        if reward == previous_reward:
-            reward = max(reward-.5, 0)
+        if previous_action != previous_action:
+            reward = self.reward_update(reward)
+
+        if previous_action == previous_action:
+            reward = max(reward-0.025, 0)
 
         # Save experience in replay memory
         self.memory.push(state, action, reward, next_state, terminated, truncated)

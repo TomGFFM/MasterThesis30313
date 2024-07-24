@@ -1,20 +1,15 @@
 # import standards
 import logging
 import os
-import sys
-
-# add project folder to path dynamically
-project_dir = os.path.dirname(os.getcwd())
-sys.path.append(project_dir)
 
 # import torch and gym
 import torch
 import gym
 
 # import custom
-from agents import DeepQNetworkAgentv2
+from agents import DeepQNetworkAgent
 from networks import DDQAugmentedTransformerNN
-from utils import FrameProcessor, AgentOptimizerv2
+from utils import FrameProcessor
 
 # #####################################################
 # ################ output directory ###################
@@ -25,8 +20,7 @@ output_dir = '../output'
 # #####################################################
 # ################ init logging #######################
 # #####################################################
-# logging.basicConfig(filename=output_dir + '/log_files/DDQAugmentedTransformerNN_training.log',level=logging.INFO,
-# format='%(asctime)s - %(levelname)s - %(message)s')
+# logging.basicConfig(filename=output_dir + '/log_files/DDQAugmentedTransformerNN_training.log',level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
@@ -54,7 +48,7 @@ logging.info(f"Device was set to: {device}")
 output_dir = '../output'
 
 # initialize the gym environment
-env = gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array")
+env = gym.make("ALE/SpaceInvaders-v5", render_mode="human")
 
 # #####################################################
 # ################ init hyperparameter ################
@@ -64,7 +58,7 @@ agent_hyper_params = {
     "action_size": env.action_space.n,      # number of allowed actions in game
     "epsilon_start": 0.99,                  # start value for epsilon
     "epsilon_end": 0.01,                    # lowest possible epsilon value
-    "epsilon_decay": 0.0005,                # factor by which epsilon gets reduced
+    "epsilon_decay": 0.001,                 # factor by which epsilon gets reduced
     "gamma": 0.99,                          # how much are future rewards valued
     "learn_start": 64,                      # number of rounds before the training starts
     "learning_rate": 0.0001,                # learning rate
@@ -89,15 +83,6 @@ network_hyper_params = {
 }
 
 # #####################################################
-# ################ changes compare to v2 ##############
-# #####################################################
-# parameters: further reduction of epsilon decay, reduction of linear layer size,
-# reduced number of rounds before training starts, reduced replay threshold
-# increased number of attention encoder layers, increase input shape from game environment
-# increased complexity of convolutional layers
-# implementation: integrated reward shaping into the agent step method
-
-# #####################################################
 # ################ init agent #########################
 # #####################################################
 
@@ -105,20 +90,36 @@ network_hyper_params = {
 fp = FrameProcessor()
 
 # init agent
-agent = DeepQNetworkAgentv2(model=DDQAugmentedTransformerNN,
-                            action_size=env.action_space.n,
-                            device=device,
-                            agent_hyper_params=agent_hyper_params,
-                            network_hyper_params=network_hyper_params,
-                            model_name='DDQAugmentedTransformerNNv3')
+trained_agent = DeepQNetworkAgent(model=DDQAugmentedTransformerNN,
+                          action_size=env.action_space.n,
+                          device=device,
+                          agent_hyper_params=agent_hyper_params,
+                          network_hyper_params=network_hyper_params)
 
-# #####################################################
-# ################ train agent ########################
-# #####################################################
-ao = AgentOptimizerv2(agent=agent,
-                      env=env,
-                      hyperparameter=agent_hyper_params,
-                      network_hyper_params=network_hyper_params,
-                      device=device)
+# load pre-trained model into agent
+trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20240724_DDQAugmentedTransformerNNv3_best_model_score_v2.pth', map_location=device)
 
-ao.train(output_dir=output_dir)
+output_size = network_hyper_params['input_shape'][1]
+
+score = 0
+state = fp.preprocess(stacked_frames=None,
+                      env_state=env.reset()[0],
+                      exclude=(8, -12, -12, 4),
+                      output=output_size,
+                      is_new=True)
+
+while True:
+    env.render()
+    action, _ = trained_agent.act(state)
+    next_state, reward, terminated, truncated, info = env.step(action)
+    score += reward
+    state = fp.preprocess(stacked_frames=state,
+                               env_state=next_state,
+                               exclude=(8, -12, -12, 4),
+                               output=output_size,
+                               is_new=False)
+
+    if terminated:
+        print("You Final score is:", score)
+        break
+env.close()

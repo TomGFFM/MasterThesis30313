@@ -263,6 +263,7 @@ class AgentOptimizerv2:
 
         for episode in range(1, self.n_episodes + 1):
             # Init relevant variables for episode
+            previous_action = 0
             score = 0
             loss = 0
             eps = self.epsilon_decay(episode=episode)
@@ -289,7 +290,7 @@ class AgentOptimizerv2:
                 logging.debug(f"reward before scaling: {reward}")
 
                 # Normalize the reward
-                reward = mmscaler.transform([[reward]])[0,0]
+                reward = mmscaler.transform([[reward]])[0, 0]
                 logging.debug(f"reward after scaling: {reward}")
 
                 # Preprocess the next state
@@ -306,12 +307,14 @@ class AgentOptimizerv2:
                                         next_state=next_state,
                                         terminated=terminated,
                                         truncated=truncated,
-                                        previous_reward=score)
+                                        previous_reward=score,
+                                        previous_action=previous_action,)
 
                 logging.debug(f'STEP LOSS FOR DEBUG REVIEW: {loss:.2f}')
 
                 state = next_state
                 score += reward
+                previous_action = action
 
                 if terminated:
                     break
