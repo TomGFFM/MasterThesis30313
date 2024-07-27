@@ -358,7 +358,7 @@ class AgentOptimizerv2:
 
             if mvg_avg_score > best_score:
                 best_score = mvg_avg_score
-                model_path = self.get_file_path(output_dir + '/models', f'best_model_score.pth')
+                model_path = self.get_file_path(output_dir + '/models', f'best_model_score_{episode}.pth')
                 self.agent.save(model_path)  # Save the best model
                 logging.info(f'New best model saved with score: {best_score:.2f}')
 

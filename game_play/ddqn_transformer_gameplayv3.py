@@ -58,7 +58,7 @@ agent_hyper_params = {
     "action_size": env.action_space.n,      # number of allowed actions in game
     "epsilon_start": 0.99,                  # start value for epsilon
     "epsilon_end": 0.01,                    # lowest possible epsilon value
-    "epsilon_decay": 0.001,                 # factor by which epsilon gets reduced
+    "epsilon_decay": 0.0005,                # factor by which epsilon gets reduced
     "gamma": 0.99,                          # how much are future rewards valued
     "learn_start": 64,                      # number of rounds before the training starts
     "learning_rate": 0.0001,                # learning rate
@@ -69,7 +69,6 @@ agent_hyper_params = {
     "update_target": 128,                   # threshold to start the replay
     "n_episodes": 10000                     # number of episodes to play for the agent
 }
-
 
 network_hyper_params = {
     "input_shape": (4, 90, 90),             # desired shape of state pictures
@@ -97,7 +96,7 @@ trained_agent = DeepQNetworkAgent(model=DDQAugmentedTransformerNN,
                           network_hyper_params=network_hyper_params)
 
 # load pre-trained model into agent
-trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20240724_DDQAugmentedTransformerNNv3_best_model_score_v2.pth', map_location=device)
+trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20240727_DDQAugmentedTransformerNNv3_best_model_score_6383.pth', map_location=device)
 
 output_size = network_hyper_params['input_shape'][1]
 
