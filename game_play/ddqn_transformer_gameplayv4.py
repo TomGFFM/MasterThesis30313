@@ -60,22 +60,22 @@ agent_hyper_params = {
     "epsilon_end": 0.01,                    # lowest possible epsilon value
     "epsilon_decay": 0.0005,                # factor by which epsilon gets reduced
     "gamma": 0.99,                          # how much are future rewards valued
-    "learn_start": 64,                      # number of rounds before the training starts
+    "learn_start": 32,                      # number of rounds before the training starts
     "learning_rate": 0.0001,                # learning rate
     "max_steps": 5000,                      # maximum actions to be taken within an episode
     "replay_buffer_size": 100000,           # size of the replay buffer
     "tau": 0.001,                           # defines how fast the target network gets adjusted to the policy netw.
-    "update_every": 2,                      # after how many steps gets the network updated
-    "update_target": 128,                   # threshold to start the replay
-    "n_episodes": 10000                     # number of episodes to play for the agent
+    "update_every": 1,                      # after how many steps gets the network updated
+    "update_target": 32,                    # threshold to start the replay
+    "n_episodes": 30000                     # number of episodes to play for the agent
 }
 
 network_hyper_params = {
     "input_shape": (4, 90, 90),             # desired shape of state pictures
     "num_actions": env.action_space.n,      # number of allowed actions in game
-    "num_heads": 16,                        # number of attention heads in transformer layers
-    "num_layers": 16,                       # number of transformer encoding layers
-    "size_linear_layers": 512,              # size of the fully connect linear layers in the transformer encoder setup
+    "num_heads": 8,                         # number of attention heads in transformer layers
+    "num_layers": 8,                        # number of transformer encoding layers
+    "size_linear_layers": 1024,             # size of the fully connect linear layers in the transformer encoder setup
     "conv_channels": [64, 128, 192, 256],   # convolutional channels for CNN picture extraction
     "save_images": False,                   # save images from CNN layer (for testing only, keep false for normal training)
     "output_dir": output_dir                # output directory for saving images (directory has to contain subfolder images)
@@ -96,7 +96,7 @@ trained_agent = DeepQNetworkAgent(model=DDQAugmentedTransformerNN,
                           network_hyper_params=network_hyper_params)
 
 # load pre-trained model into agent
-trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20240728_DDQAugmentedTransformerNNv3_best_model_score_8830.pth', map_location=device)
+trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20240731_DDQAugmentedTransformerNNv4_best_model_score_15746.pth', map_location=device)
 
 output_size = network_hyper_params['input_shape'][1]
 

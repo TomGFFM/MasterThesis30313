@@ -1,15 +1,20 @@
 # import standards
 import logging
 import os
+import sys
+
+# add project folder to path dynamically
+project_dir = os.path.dirname(os.getcwd())
+sys.path.append(project_dir)
 
 # import torch and gym
 import torch
 import gym
 
 # import custom
-from agents import DeepQNetworkAgent
+from agents import DeepQNetworkAgentv2
 from networks import DDQAugmentedTransformerNN
-from utils import FrameProcessor
+from utils import FrameProcessor, AgentOptimizerv2
 
 # #####################################################
 # ################ output directory ###################
@@ -20,7 +25,8 @@ output_dir = '../output'
 # #####################################################
 # ################ init logging #######################
 # #####################################################
-# logging.basicConfig(filename=output_dir + '/log_files/DDQAugmentedTransformerNN_training.log',level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# logging.basicConfig(filename=output_dir + '/log_files/DDQAugmentedTransformerNN_training.log',level=logging.INFO,
+# format='%(asctime)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
@@ -48,7 +54,7 @@ logging.info(f"Device was set to: {device}")
 output_dir = '../output'
 
 # initialize the gym environment
-env = gym.make("ALE/SpaceInvaders-v5", render_mode="human")
+env = gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array")
 
 # #####################################################
 # ################ init hyperparameter ################
@@ -60,26 +66,35 @@ agent_hyper_params = {
     "epsilon_end": 0.01,                    # lowest possible epsilon value
     "epsilon_decay": 0.0005,                # factor by which epsilon gets reduced
     "gamma": 0.99,                          # how much are future rewards valued
-    "learn_start": 64,                      # number of rounds before the training starts
+    "learn_start": 32,                      # number of rounds before the training starts
     "learning_rate": 0.0001,                # learning rate
     "max_steps": 5000,                      # maximum actions to be taken within an episode
     "replay_buffer_size": 100000,           # size of the replay buffer
     "tau": 0.001,                           # defines how fast the target network gets adjusted to the policy netw.
-    "update_every": 2,                      # after how many steps gets the network updated
-    "update_target": 128,                   # threshold to start the replay
-    "n_episodes": 10000                     # number of episodes to play for the agent
+    "update_every": 1,                      # after how many steps gets the network updated
+    "update_target": 32,                    # threshold to start the replay
+    "n_episodes": 30000                     # number of episodes to play for the agent
 }
 
 network_hyper_params = {
     "input_shape": (4, 90, 90),             # desired shape of state pictures
     "num_actions": env.action_space.n,      # number of allowed actions in game
-    "num_heads": 16,                        # number of attention heads in transformer layers
-    "num_layers": 16,                       # number of transformer encoding layers
-    "size_linear_layers": 512,              # size of the fully connect linear layers in the transformer encoder setup
+    "num_heads": 32,                         # number of attention heads in transformer layers
+    "num_layers": 32,                        # number of transformer encoding layers
+    "size_linear_layers": 2048,             # size of the fully connect linear layers in the transformer encoder setup
     "conv_channels": [64, 128, 192, 256],   # convolutional channels for CNN picture extraction
     "save_images": False,                   # save images from CNN layer (for testing only, keep false for normal training)
     "output_dir": output_dir                # output directory for saving images (directory has to contain subfolder images)
 }
+
+# #####################################################
+# ################ changes compare to v2 ##############
+# #####################################################
+# parameters: further reduction of epsilon decay, reduction of linear layer size,
+# reduced number of rounds before training starts, reduced replay threshold
+# increased number of attention encoder layers, increase input shape from game environment
+# increased complexity of convolutional layers
+# implementation: integrated reward shaping into the agent step method
 
 # #####################################################
 # ################ init agent #########################
@@ -89,36 +104,20 @@ network_hyper_params = {
 fp = FrameProcessor()
 
 # init agent
-trained_agent = DeepQNetworkAgent(model=DDQAugmentedTransformerNN,
-                          action_size=env.action_space.n,
-                          device=device,
-                          agent_hyper_params=agent_hyper_params,
-                          network_hyper_params=network_hyper_params)
+agent = DeepQNetworkAgentv2(model=DDQAugmentedTransformerNN,
+                            action_size=env.action_space.n,
+                            device=device,
+                            agent_hyper_params=agent_hyper_params,
+                            network_hyper_params=network_hyper_params,
+                            model_name='DDQAugmentedTransformerNNv5')
 
-# load pre-trained model into agent
-trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20240728_DDQAugmentedTransformerNNv3_best_model_score_8830.pth', map_location=device)
+# #####################################################
+# ################ train agent ########################
+# #####################################################
+ao = AgentOptimizerv2(agent=agent,
+                      env=env,
+                      hyperparameter=agent_hyper_params,
+                      network_hyper_params=network_hyper_params,
+                      device=device)
 
-output_size = network_hyper_params['input_shape'][1]
-
-score = 0
-state = fp.preprocess(stacked_frames=None,
-                      env_state=env.reset()[0],
-                      exclude=(8, -12, -12, 4),
-                      output=output_size,
-                      is_new=True)
-
-while True:
-    env.render()
-    action, _ = trained_agent.act(state)
-    next_state, reward, terminated, truncated, info = env.step(action)
-    score += reward
-    state = fp.preprocess(stacked_frames=state,
-                               env_state=next_state,
-                               exclude=(8, -12, -12, 4),
-                               output=output_size,
-                               is_new=False)
-
-    if terminated:
-        print("You Final score is:", score)
-        break
-env.close()
+ao.train(output_dir=output_dir)

@@ -298,11 +298,11 @@ class DeepQNetworkAgentv2:
         if reward > previous_reward:
             reward = self.reward_update(reward)
 
-        if previous_action != previous_action:
+        if previous_action != action:
             reward = self.reward_update(reward)
 
-        # if previous_action == previous_action:
-        #     reward = max(reward-0.025, 0)
+        if previous_action == action:
+            reward = reward*0.5
 
         # Save experience in replay memory
         self.memory.push(state, action, reward, next_state, terminated, truncated)
