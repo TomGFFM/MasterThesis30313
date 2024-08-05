@@ -67,7 +67,7 @@ agent_hyper_params = {
     "tau": 0.001,                           # defines how fast the target network gets adjusted to the policy netw.
     "update_every": 1,                      # after how many steps gets the network updated
     "update_target": 32,                    # threshold to start the replay
-    "n_episodes": 30000                     # number of episodes to play for the agent
+    "n_episodes": 1500                      # number of episodes to play for the agent
 }
 
 network_hyper_params = {
@@ -96,7 +96,7 @@ trained_agent = DeepQNetworkAgent(model=DDQAugmentedTransformerNN,
                           network_hyper_params=network_hyper_params)
 
 # load pre-trained model into agent
-trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20240801_DDQAugmentedTransformerNNv5_best_model_score_2266.pth', map_location=device)
+trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20240805_DDQAugmentedTransformerNNv5_best_model_score_20.pth', map_location=device)
 
 output_size = network_hyper_params['input_shape'][1]
 

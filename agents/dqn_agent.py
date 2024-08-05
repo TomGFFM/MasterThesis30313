@@ -294,18 +294,17 @@ class DeepQNetworkAgentv2:
         Returns:
             loss(float): loss value from q values
         """
-        # Shape reward in case next score was higher than the previous one
-        if reward > previous_reward:
+        # Shape reward if the next score was higher or if the action changed
+        if reward > previous_reward or previous_action != action:
             reward = self.reward_update(reward)
 
-        if previous_action != action:
-            reward = self.reward_update(reward)
+        # Punish if action is 0 or if the same action is repeated
+        if action == 0 or previous_action == action:
+            reward = self.reward_update(reward, punish=True)
 
-        if previous_action == action:
-            reward = reward*0.5
-
+        # Additional punishment if the episode has terminated
         if terminated:
-            reward = reward*0.5
+            reward = self.reward_update(reward, punish=True)
 
         # Save experience in replay memory
         self.memory.push(state, action, reward, next_state, terminated, truncated)
@@ -434,12 +433,13 @@ class DeepQNetworkAgentv2:
         self.policy_net.load_state_dict(state['policy_net'])
         self.optimizer.load_state_dict(state['optimizer'])
 
-    def reward_update(self, reward: float) -> float:
+    def reward_update(self, reward: float, punish: bool = False) -> float:
         """
-        Adjust the reward based on an exponentially increasing factor of the score.
+        Adjust the reward based on an exponentially increasing or decreasing factor of the score.
 
         Args:
             reward (float): The current reward.
+            punish (bool): Whether to apply a punishment (decrease the reward). Default is False.
 
         Returns:
             float: The adjusted reward.
@@ -447,10 +447,13 @@ class DeepQNetworkAgentv2:
         # Define an exponential base for the factor
         base_factor = 1.5
 
-        # Calculate the factor exponentially based on the score
-        factor = base_factor ** (reward / 100)
+        # Calculate the factor exponentially based on the reward
+        factor = base_factor ** (abs(reward) / 100)
 
-        # Adjust the reward
-        adjusted_reward = reward * factor
+        # Adjust the reward based on whether it's a punishment or reward
+        if punish:
+            adjusted_reward = reward / factor
+        else:
+            adjusted_reward = reward * factor
 
         return adjusted_reward

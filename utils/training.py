@@ -231,6 +231,19 @@ class AgentOptimizerv2:
         return self.hyper_params['epsilon_end'] + (self.hyper_params['epsilon_start'] - self.hyper_params['epsilon_end']) * math.exp(
             -self.hyper_params['epsilon_decay'] * episode)
 
+    def epsilon_decay_linear(self, episode: int) -> float:
+        """
+        Calculate the epsilon value for a given episode based on linear decay.
+
+        Args:
+            episode (int): The current episode.
+
+        Returns:
+            float: The epsilon value for the given episode.
+        """
+        decay_rate = (self.hyper_params['epsilon_start'] - self.hyper_params['epsilon_end']) / self.n_episodes
+        return max(self.hyper_params['epsilon_end'], self.hyper_params['epsilon_start'] - decay_rate * episode)
+
     def train(self, output_dir: str = './output') -> None:
         """
         Train the agent for a specified number of episodes.
@@ -266,7 +279,7 @@ class AgentOptimizerv2:
             previous_action = 0
             score = 0
             loss = 0
-            eps = self.epsilon_decay(episode=episode)
+            eps = self.epsilon_decay_linear(episode=episode)
             count_predicted_actions = 0
             count_random_actions = 0
 
@@ -358,7 +371,7 @@ class AgentOptimizerv2:
 
             if mvg_avg_score > best_score:
                 best_score = mvg_avg_score
-                model_path = self.get_file_path(output_dir + '/models', f'best_model_score_{episode}.pth')
+                model_path = self.get_file_path(output_dir + '/models', f'best_model_episode_{episode}_score_{best_score}.pth')
                 self.agent.save(model_path)  # Save the best model
                 logging.info(f'New best model saved with score: {best_score:.2f}')
 
