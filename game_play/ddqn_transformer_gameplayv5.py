@@ -54,28 +54,28 @@ env = gym.make("ALE/SpaceInvaders-v5", render_mode="human")
 # ################ init hyperparameter ################
 # #####################################################
 agent_hyper_params = {
-    "batch_size": 128,                      # size of each batch pushed through the network
+    "batch_size": 256,                      # size of each batch pushed through the network
     "action_size": env.action_space.n,      # number of allowed actions in game
     "epsilon_start": 0.99,                  # start value for epsilon
-    "epsilon_end": 0.01,                    # lowest possible epsilon value
-    "epsilon_decay": 0.0005,                # factor by which epsilon gets reduced
+    "epsilon_end": 0.25,                    # lowest possible epsilon value
+    "epsilon_decay": 0.02,                # factor by which epsilon gets reduced
     "gamma": 0.99,                          # how much are future rewards valued
-    "learn_start": 32,                      # number of rounds before the training starts
-    "learning_rate": 0.0001,                # learning rate
+    "learn_start": 500,                     # number of rounds before the training starts
+    "learning_rate": 0.00001,                # learning rate
     "max_steps": 5000,                      # maximum actions to be taken within an episode
     "replay_buffer_size": 100000,           # size of the replay buffer
     "tau": 0.001,                           # defines how fast the target network gets adjusted to the policy netw.
-    "update_every": 1,                      # after how many steps gets the network updated
-    "update_target": 32,                    # threshold to start the replay
-    "n_episodes": 1500                      # number of episodes to play for the agent
+    "update_every": 8,                      # after how many steps gets the network updated
+    "update_target": 500,                   # threshold to start the replay
+    "n_episodes": 3000                      # number of episodes to play for the agent
 }
 
 network_hyper_params = {
     "input_shape": (4, 90, 90),             # desired shape of state pictures
     "num_actions": env.action_space.n,      # number of allowed actions in game
-    "num_heads": 32,                         # number of attention heads in transformer layers
-    "num_layers": 32,                        # number of transformer encoding layers
-    "size_linear_layers": 2048,             # size of the fully connect linear layers in the transformer encoder setup
+    "num_heads": 64,                        # number of attention heads in transformer layers
+    "num_layers": 32,                       # number of transformer encoding layers
+    "size_linear_layers": 4096,             # size of the fully connect linear layers in the transformer encoder setup
     "conv_channels": [64, 128, 192, 256],   # convolutional channels for CNN picture extraction
     "save_images": False,                   # save images from CNN layer (for testing only, keep false for normal training)
     "output_dir": output_dir                # output directory for saving images (directory has to contain subfolder images)
@@ -96,7 +96,7 @@ trained_agent = DeepQNetworkAgent(model=DDQAugmentedTransformerNN,
                           network_hyper_params=network_hyper_params)
 
 # load pre-trained model into agent
-trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20240805_DDQAugmentedTransformerNNv5_best_model_score_20.pth', map_location=device)
+trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20240807_DDQAugmentedTransformerNNv5_best_model_episode_2065_score_0.19467.pth', map_location=device)
 
 output_size = network_hyper_params['input_shape'][1]
 
