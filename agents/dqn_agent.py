@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
@@ -555,6 +556,7 @@ class DeepQNetworkAgentv3:
 
         # Learn every UPDATE_EVERY time steps.
         self.t_step = (self.t_step + 1) % self.update_every
+        # logging.info(f't_step: {self.t_step}, update_every: {self.update_every}')
 
         # Init loss
         loss = 0
@@ -647,6 +649,8 @@ class DeepQNetworkAgentv3:
         for target_param, policy_param in zip(target_model.parameters(), policy_model.parameters()):
             target_param.data.copy_(tau * policy_param.data + (1.0 - tau) * target_param.data)
 
+        logging.info(f'Soft update executed. Tau: {tau}')
+
     def save(self, filepath: str) -> None:
         """
         Save the current policy network and optimizer state to a file.
@@ -706,7 +710,8 @@ class DeepQNetworkAgentv4:
     """A DQN agent that interacts with and learns from the environment."""
 
     def __init__(self,
-                 model: torch.nn.Module,
+                 policy_net: torch.nn.Module,
+                 target_net: torch.nn.Module,
                  action_size: int,
                  device: torch.device,
                  agent_hyper_params: Dict,
@@ -723,7 +728,6 @@ class DeepQNetworkAgentv4:
         Initialize an Agent object.
 
         Args:
-            model (torch.nn.Module): The PyTorch model class for the Q-network.
             action_size (int): Dimension of each action.
             device (torch.device): The device on which the model will be run (e.g., CPU or GPU).
             agent_hyper_params (Dict): Dictionary containing hyperparameters for the agent, such as 'batch_size', 'gamma', 'learning_rate', 'replay_buffer_size', 'tau', 'final_tau', 'max_steps', 'update_every', and 'update_target'.
@@ -742,14 +746,12 @@ class DeepQNetworkAgentv4:
         self._network_hyper_params = network_hyper_params
 
         # set relevant hyperparameter and model vars
-        self.DQN = model
         self.action_size = action_size
         self.device = device
         self.batch_size = agent_hyper_params['batch_size']
         self.gamma = agent_hyper_params['gamma']
 
         # learning related parameters
-        self.learning_rate = agent_hyper_params['learning_rate']
         self.replay_buffer_size = agent_hyper_params['replay_buffer_size']
         self.tau = agent_hyper_params['tau']
         self.final_tau = agent_hyper_params['final_tau']
@@ -763,25 +765,13 @@ class DeepQNetworkAgentv4:
         self.punish_factor = punish_factor
 
         # Q-Network
-        self.policy_net = self.DQN(**network_hyper_params).to(self.device)
-        self.target_net = self.DQN(**network_hyper_params).to(self.device)
+        self.policy_net = policy_net
+        self.target_net = target_net
 
         # Optimizer, LR and loss function
-        self.optimizer = optimizer(self.policy_net.parameters(), lr=self.learning_rate)
+        self.optimizer = optimizer
         self.loss_function = loss_function
-        self.learning_rate_step_size = agent_hyper_params['learning_rate_step_size']
-        self.learning_rate_gamma = agent_hyper_params['learning_rate_gamma']
-        if lr_scheduler is not None:
-            self.lr_scheduler = lr_scheduler(optimizer=self.optimizer,
-                                             step_size=self.learning_rate_step_size,
-                                             gamma=self.learning_rate_gamma)
-        else:
-            self.lr_scheduler = None
-
-        # Update model names if set from outside
-        if model_name:
-            self.policy_net.model_name = model_name
-            self.target_net.model_name = model_name
+        self.lr_scheduler = lr_scheduler
 
         # Replay memory
         self.memory = ReplayBuffer(self.replay_buffer_size, self.batch_size, self.device)
@@ -789,9 +779,19 @@ class DeepQNetworkAgentv4:
         # Init internal step counter
         self.step_count = 0
 
+        # Init metric collection
+        self.tau_step_value = self.tau
+        self.lr_step_value = agent_hyper_params['learning_rate']
+        self.df_final_q_metrics = pd.DataFrame()
+        self.episode = 0
+
     @property
     def agent_model(self):
         return self.policy_net.model_name
+
+    @property
+    def q_value_metrics(self):
+        return self.df_final_q_metrics
 
     @property
     def agent_hyper_params(self):
@@ -802,7 +802,7 @@ class DeepQNetworkAgentv4:
         return self._network_hyper_params
 
     def step(self, state: np.ndarray, action: int, reward: float, next_state: np.ndarray, terminated: bool,
-             truncated: bool, previous_reward: float, previous_action: int) -> float:
+             truncated: bool, previous_reward: float, previous_action: int, episode: int) -> float:
         """
         Perform a single step of the agent's interaction with the environment.
 
@@ -815,10 +815,13 @@ class DeepQNetworkAgentv4:
             truncated (bool): Whether the episode has been truncated.
             previous_reward (float): The previous reward received by the agent.
             previous_action (int): The previous action taken by the agent.
+            episode (int): The current episode number.
 
         Returns:
             loss(float): loss value from q values
         """
+
+        self.episode = episode
 
         if self.reward_shaping:
             # Shape reward if the next score was higher or if the action changed
@@ -852,7 +855,7 @@ class DeepQNetworkAgentv4:
         # Increment step_count
         self.step_count += 1
 
-        return loss, reward
+        return loss, reward, self.tau_step_value, self.lr_step_value
 
     def act(self, state: np.ndarray, eps: float = 0.) -> Tuple[torch.Tensor, str]:
         """
@@ -904,8 +907,34 @@ class DeepQNetworkAgentv4:
         # Compute Q targets for current states
         q_targets = rewards + (self.gamma * q_targets_next * (1 - terminations) * (1 - truncations))
 
+        # Compute Q metrics
+        metrics = {}
+
+        # Calculate average Q-value
+        metrics['avg_q_value'] = q_expected_current.mean().item()
+
+        # Calculate max and min Q-value
+        metrics['max_q_value'] = q_expected_current.max().item()
+        metrics['min_q_value'] = q_expected_current.min().item()
+
+        # Calculate Q-value variance
+        metrics['q_value_variance'] = q_expected_current.var().item()
+
+        # Calculate TD-Error (absolute difference between q_targets and q_expected)
+        metrics['td_error'] = (q_targets - q_expected).abs().mean().item()
+
+        # Calculate the ratio of positive Q-values
+        metrics['positive_q_ratio'] = (q_expected_current > 0).float().mean().item()
+
+        # Calculate Q-value for the chosen actions
+        metrics['q_value_for_action'] = q_expected_current.gather(1, actions.unsqueeze(1)).mean().item()
+
+        # Create final q metrics dataframe
+        df_q_metrics = pd.DataFrame([metrics])
+        df_q_metrics['episode'] = self.episode
+        self.df_final_q_metrics = pd.concat([self.df_final_q_metrics, df_q_metrics], ignore_index=True)
+
         # Compute loss
-        # loss = F.mse_loss(q_expected, q_targets)
         loss = self.loss_function(q_expected, q_targets)
         logging.debug(f"Current loss: {loss}")
 
@@ -916,6 +945,7 @@ class DeepQNetworkAgentv4:
 
         if self.lr_scheduler is not None:
             self.lr_scheduler.step()
+            self.lr_step_value = self.optimizer.param_groups[0]['lr']
 
         # Update target network
         self.soft_update(self.policy_net, self.target_net)
@@ -933,6 +963,7 @@ class DeepQNetworkAgentv4:
         """
         # Dynamically decrease tau over time but keep above 0
         tau = max(self.tau * (1 - self.step_count / self.max_steps), self.final_tau)
+        self.tau_step_value = tau
 
         with torch.no_grad():
             for target_param, policy_param in zip(target_model.parameters(), policy_model.parameters()):

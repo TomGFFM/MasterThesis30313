@@ -686,11 +686,13 @@ class AgentOptimizerv4:
         # initalize scaler for reward scaling to achieve consistent training situation (scaling from -1 to 1)
         mscaler = MaxAbsScaler()
         mscaler.fit(np.array([0, 1000]).reshape(-1, 1))
+        # mscaler = MinMaxScaler(feature_range=(0, 1))
+        # mscaler.fit(np.array([0, 1000]).reshape(-1, 1))
 
         # get expected picture shape for preprocessing correctly
         output_size = self.network_hyper_params['input_shape'][1]
 
-        # init pre-episode scores
+        # init pre-episode scores and other metrics
         best_score = 0
         mvg_avg_score = 0
         mvg_avg_loss = 0
@@ -708,6 +710,8 @@ class AgentOptimizerv4:
             previous_action = 0
             score = 0
             loss = 0
+            taus_in_episode = []
+            lrs_in_episode = []
             eps = self.epsilon_decay(episode=episode)
             count_predicted_actions = 0
             count_random_actions = 0
@@ -747,18 +751,19 @@ class AgentOptimizerv4:
                                                 is_new=False)
 
                 # Update the agent with the observed transition
-                updated_loss, updated_reward = self.agent.step(state=state,
-                                                               action=action,
-                                                               reward=reward,
-                                                               next_state=next_state,
-                                                               terminated=terminated,
-                                                               truncated=truncated,
-                                                               previous_reward=score,
-                                                               previous_action=previous_action,)
+                updated_loss, updated_reward, step_tau, step_lr = self.agent.step(state=state,
+                                                                                  action=action,
+                                                                                  reward=reward,
+                                                                                  next_state=next_state,
+                                                                                  terminated=terminated,
+                                                                                  truncated=truncated,
+                                                                                  previous_reward=score,
+                                                                                  previous_action=previous_action,
+                                                                                  episode=episode,)
 
                 loss += updated_loss
-                logging.debug(f'STEP LOSS FOR DEBUG REVIEW: {loss:.2f}')
-
+                taus_in_episode.append(step_tau)
+                lrs_in_episode.append(step_lr)
                 state = next_state
                 score += updated_reward
                 previous_action = action
@@ -789,7 +794,9 @@ class AgentOptimizerv4:
                          f'Epsilon: {eps:.5f}, '
                          f'Predicted: {count_predicted_actions}, '
                          f'Randomized: {count_random_actions}, '
-                         f'Total No. Steps: {count_predicted_actions + count_random_actions}, ')
+                         f'Total No. Steps: {count_predicted_actions + count_random_actions}, '
+                         f'Min. Tau in Episode: {min(taus_in_episode):.5f}, '
+                         f'Min. LR in Episode: {min(lrs_in_episode):.5f}, ')
 
             # Append current scores to collect metrics data
             metrics_data.append({'episode': episode,
@@ -803,7 +810,9 @@ class AgentOptimizerv4:
                                  'count_predicted_actions': count_predicted_actions,
                                  'count_random_actions': count_random_actions,
                                  'total_no_steps': count_predicted_actions + count_random_actions,
-                                 'model_saved': mvg_avg_score > best_score})
+                                 'model_saved': mvg_avg_score > best_score,
+                                 'minimum_tau_in_episode': min(taus_in_episode),
+                                 'minimum_lr_in_episode': min(lrs_in_episode)})
 
             if mvg_avg_score > best_score:
                 best_score = mvg_avg_score
@@ -811,9 +820,12 @@ class AgentOptimizerv4:
                 self.agent.save(model_path)  # Save the best model
                 logging.info(f'New best model saved with score: {best_score:.2f}')
 
-            # Save metrics to Parquet file
+            # Save non q-metrics to Parquet file
             df_metrics = pd.DataFrame(metrics_data)
             df_metrics.to_parquet(self.get_file_path(output_dir + '/metrics', 'metrics.pq'), index=False)
+
+            # Save full set of q-metrics to Parquet file
+            self.agent.q_value_metrics.to_parquet(self.get_file_path(output_dir + '/metrics', 'q_metrics.pq'), index=False)
 
         # Clear cache based on the device
         if self.device == torch.device("cuda"):

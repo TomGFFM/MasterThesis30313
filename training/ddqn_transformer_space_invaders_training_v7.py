@@ -3,17 +3,15 @@ import logging
 import os
 import sys
 
-# torch related
+# torch and gym related
+import torch
+import gym
 import torch.nn.functional as F
 import torch.optim as optim
 
 # add project folder to path dynamically
 project_dir = os.path.dirname(os.getcwd())
 sys.path.append(project_dir)
-
-# import torch and gym
-import torch
-import gym
 
 # import custom
 from agents import DeepQNetworkAgentv4
@@ -78,9 +76,9 @@ agent_hyper_params = {
     "replay_buffer_size": 100000,           # size of the replay buffer
     "tau": 0.01,                            # defines how fast the target network gets adjusted to the policy netw.
     "final_tau": 0.0001,                    # defines the lowest possible tau value
-    "update_every": 100,                    # after how many steps gets the network updated
-    "update_target": 5000,                  # threshold of steps to start the replay
-    "n_episodes": 3000                      # number of episodes to play for the agent
+    "update_every": 500,                    # after how many steps gets the network updated
+    "update_target": 500,                   # threshold of steps(actions) to start the replay
+    "n_episodes": 5000                      # number of episodes to play for the agent
 }
 
 network_hyper_params = {
@@ -95,29 +93,41 @@ network_hyper_params = {
 }
 
 # #####################################################
-# ################ changes compare to v2 ##############
+# ##### init networks, optimizers and co. #############
 # #####################################################
-# parameters: further reduction of epsilon decay, reduction of linear layer size,
-# reduced number of rounds before training starts, reduced replay threshold
-# increased number of attention encoder layers, increase input shape from game environment
-# increased complexity of convolutional layers
-# implementation: integrated reward shaping into the agent step method
+# inital network and optimizer setup
+model_name = 'DDQAugmentedTransformerNNv7'
+
+# Q-Network
+policy_net = DDQAugmentedTransformerNN(**network_hyper_params).to(device)
+target_net = DDQAugmentedTransformerNN(**network_hyper_params).to(device)
+
+# Set model name parameter in networks for logging purposes
+if model_name:
+    policy_net.model_name = model_name
+    target_net.model_name = model_name
+
+# Init optimizer
+optimizer = optim.NAdam(policy_net.parameters(), lr=agent_hyper_params['learning_rate'])
+
+# Init lr scheduler (optional)
+lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=agent_hyper_params['n_episodes'], eta_min=0.000001)
 
 # #####################################################
 # ################ init agent #########################
 # #####################################################
-
 # initialize frame processor for preprocess the game images and for stacking the frames
 fp = FrameProcessor()
 
 # init agent
-agent = DeepQNetworkAgentv4(model=DDQAugmentedTransformerNN,
+agent = DeepQNetworkAgentv4(policy_net=policy_net,
+                            target_net=target_net,
                             action_size=env.action_space.n,
                             device=device,
                             agent_hyper_params=agent_hyper_params,
                             network_hyper_params=network_hyper_params,
-                            optimizer=optim.RAdam,
-                            lr_scheduler=None,
+                            optimizer=optimizer,
+                            lr_scheduler=lr_scheduler,
                             reward_shaping=True,
                             reward_factor=1.4,
                             punish_factor=1.8,
