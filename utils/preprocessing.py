@@ -9,7 +9,7 @@ class FrameProcessor:
     into a single input tensor suitable for use in deep learning models.
 
     Attributes:
-        environment (np.ndarray): The game environment providing the frames to preprocess.
+
     """
 
     def __init__(self) -> None:
@@ -104,3 +104,4 @@ class FrameProcessor:
             stacked_frames[-1] = frame
 
         return stacked_frames
+

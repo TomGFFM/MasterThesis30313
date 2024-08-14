@@ -363,3 +363,4 @@ class CNNExtractor(nn.Module):
             # Create an image from the array and save it
             image = Image.fromarray(ndarr)
             image.save(filepath)
+
