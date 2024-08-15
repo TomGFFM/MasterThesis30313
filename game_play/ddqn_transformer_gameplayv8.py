@@ -9,10 +9,6 @@ import gym
 import torch.nn.functional as F
 import torch.optim as optim
 
-# add project folder to path dynamically
-project_dir = os.path.dirname(os.getcwd())
-sys.path.append(project_dir)
-
 # import custom
 from agents import DeepQNetworkAgentv5
 from networks import DDQAugmentedTransformerNNv2
@@ -27,8 +23,7 @@ output_dir = '../output'
 # #####################################################
 # ################ init logging #######################
 # #####################################################
-# logging.basicConfig(filename=output_dir + '/log_files/DDQAugmentedTransformerNN_training.log',level=logging.INFO,
-# format='%(asctime)s - %(levelname)s - %(message)s')
+# logging.basicConfig(filename=output_dir + '/log_files/DDQAugmentedTransformerNN_training.log',level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
@@ -56,7 +51,7 @@ logging.info(f"Device was set to: {device}")
 output_dir = '../output'
 
 # initialize the gym environment
-env = gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array")
+env = gym.make("ALE/SpaceInvaders-v5", render_mode="human")
 
 # #####################################################
 # ################ init hyperparameter ################
@@ -68,10 +63,10 @@ agent_hyper_params = {
     "epsilon_end": 0.4,                     # lowest possible epsilon value
     "epsilon_decay": 0.01,                  # factor by which epsilon gets reduced
     "gamma": 0.99,                          # how much are future rewards valued
-    "learn_start": 150,                     # number of rounds before the training starts
-    "learning_rate": 0.05,                  # learning rate
+    "learn_start": 250,                     # number of rounds before the training starts
+    "learning_rate": 0.001,                 # learning rate
     "learning_rate_step_size": 250,         # decrease learning rate by lr gamma after so many steps (works only if lr_scheduler object was passed to agent)
-    "learning_rate_gamma": 0.25,            # factor by which the lr is reduced after lr steps (works only if lr_scheduler object was passed to agent)
+    "learning_rate_gamma": 0.5,             # factor by which the lr is reduced after lr steps (works only if lr_scheduler object was passed to agent)
     "max_steps_episode": 3000,              # maximum actions to be expected within an episode
     "replay_buffer_size": 100000,           # size of the replay buffer
     "tau": 0.01,                            # defines how fast the target network gets adjusted to the policy netw.
@@ -113,34 +108,52 @@ optimizer = optim.NAdam(policy_net.parameters(), lr=agent_hyper_params['learning
 # Init lr scheduler (optional)
 lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=agent_hyper_params['n_episodes'], eta_min=0.000001)
 
+
 # #####################################################
 # ################ init agent #########################
 # #####################################################
+
 # initialize frame processor for preprocess the game images and for stacking the frames
 fp = FrameProcessor()
 
 # init agent
-agent = DeepQNetworkAgentv5(policy_net=policy_net,
-                            target_net=target_net,
-                            action_size=env.action_space.n,
-                            device=device,
-                            agent_hyper_params=agent_hyper_params,
-                            network_hyper_params=network_hyper_params,
-                            optimizer=optimizer,
-                            lr_scheduler=lr_scheduler,
-                            reward_shaping=True,
-                            reward_factor=1.4,
-                            punish_factor=1.8,
-                            loss_function=F.huber_loss,
-                            loss_function_delta=2.0)
+trained_agent = DeepQNetworkAgentv5(policy_net=policy_net,
+                                    target_net=target_net,
+                                    action_size=env.action_space.n,
+                                    device=device,
+                                    agent_hyper_params=agent_hyper_params,
+                                    network_hyper_params=network_hyper_params,
+                                    optimizer=optimizer,
+                                    lr_scheduler=lr_scheduler,
+                                    reward_shaping=True,
+                                    reward_factor=1.4,
+                                    punish_factor=1.8,
+                                    loss_function=F.smooth_l1_loss)
 
-# #####################################################
-# ################ train agent ########################
-# #####################################################
-ao = AgentOptimizerv5(agent=agent,
-                      env=env,
-                      hyperparameter=agent_hyper_params,
-                      network_hyper_params=network_hyper_params,
-                      device=device)
+# load pre-trained model into agent
+trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20240814_DDQAugmentedTransformerNNv8_best_model_episode_577_score_18.26222.pth', map_location=device)
 
-ao.train(output_dir=output_dir)
+output_size = network_hyper_params['input_shape'][1]
+
+score = 0
+state = fp.preprocess(stacked_frames=None,
+                      env_state=env.reset()[0],
+                      exclude=(8, -12, -12, 4),
+                      output=output_size,
+                      is_new=True)
+
+while True:
+    env.render()
+    action, _ = trained_agent.act(state)
+    next_state, reward, terminated, truncated, info = env.step(action)
+    score += reward
+    state = fp.preprocess(stacked_frames=state,
+                               env_state=next_state,
+                               exclude=(8, -12, -12, 4),
+                               output=output_size,
+                               is_new=False)
+
+    if terminated:
+        print("You Final score is:", score)
+        break
+env.close()

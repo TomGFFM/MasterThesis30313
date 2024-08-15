@@ -346,6 +346,7 @@ class DeepQNetworkAgentv5:
                  optimizer: torch.optim.Optimizer,
                  lr_scheduler: torch.optim.lr_scheduler = None,
                  loss_function: torch.nn.functional = None,
+                 loss_function_delta = None,
                  reward_shaping: bool = False,
                  reward_factor: float = 1.4,
                  punish_factor: float = 1.8):
@@ -361,6 +362,7 @@ class DeepQNetworkAgentv5:
             optimizer (torch.optim.Optimizer): The optimizer class used for training the policy network.
             lr_scheduler (torch.optim.lr_scheduler, optional): Learning rate scheduler to adjust the learning rate during training. Default is None.
             loss_function (torch.nn.functional, optional): Loss function used for training. Default is None.
+            loss_function_delta (float, optional): Loss function delta used for training. Default is None.
             reward_shaping (bool, optional): Whether to apply reward shaping during training. Default is False.
             reward_factor (float, optional): Factor by which rewards are multiplied during reward shaping. Default is 1.4.
             punish_factor (float, optional): Factor by which rewards are multiplied when applying punishment during reward shaping. Default is 1.8.
@@ -397,6 +399,7 @@ class DeepQNetworkAgentv5:
         # Optimizer, LR and loss function
         self.optimizer = optimizer
         self.loss_function = loss_function
+        self.loss_function_delta = loss_function_delta
         self.lr_scheduler = lr_scheduler
 
         # Replay memory
@@ -563,7 +566,11 @@ class DeepQNetworkAgentv5:
         self.df_final_q_metrics = pd.concat([self.df_final_q_metrics, df_q_metrics], ignore_index=True)
 
         # Compute loss
-        loss = self.loss_function(q_expected, q_targets)
+        if self.loss_function_delta is None:
+            loss = self.loss_function(q_expected, q_targets)
+        else:
+            loss = self.loss_function(q_expected, q_targets, delta=self.loss_function_delta)
+
         logging.debug(f"Current loss: {loss}")
 
         # Minimize the loss
