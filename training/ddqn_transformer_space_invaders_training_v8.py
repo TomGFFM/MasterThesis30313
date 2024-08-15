@@ -68,7 +68,7 @@ agent_hyper_params = {
     "epsilon_end": 0.4,                     # lowest possible epsilon value
     "epsilon_decay": 0.01,                  # factor by which epsilon gets reduced
     "gamma": 0.99,                          # how much are future rewards valued
-    "learn_start": 150,                     # number of rounds before the training starts
+    "learn_start": 100,                     # number of episodes which have to be played before the training starts
     "learning_rate": 0.05,                  # learning rate
     "learning_rate_step_size": 250,         # decrease learning rate by lr gamma after so many steps (works only if lr_scheduler object was passed to agent)
     "learning_rate_gamma": 0.25,            # factor by which the lr is reduced after lr steps (works only if lr_scheduler object was passed to agent)
@@ -76,17 +76,17 @@ agent_hyper_params = {
     "replay_buffer_size": 100000,           # size of the replay buffer
     "tau": 0.01,                            # defines how fast the target network gets adjusted to the policy netw.
     "final_tau": 0.0001,                    # defines the lowest possible tau value
-    "update_every": 500,                    # after how many steps gets the network updated
-    "update_target": 500,                   # threshold of steps(actions) to start the replay
-    "n_episodes": 5000                      # number of episodes to play for the agent
+    "update_every": 100,                    # after how many steps gets the network updated
+    "update_target": 20000,                 # threshold of steps(actions) to start the replay (RP buffer has to bigger than this number before learn method is called)
+    "n_episodes": 10000                     # number of episodes to play for the agent
 }
 
 network_hyper_params = {
     "input_shape": (4, 90, 90),             # desired shape of state pictures
     "num_actions": env.action_space.n,      # number of allowed actions in game
-    "num_heads": 64,                        # number of attention heads in transformer layers
-    "num_layers": 32,                       # number of transformer encoding layers
-    "size_linear_layers": 4096,             # size of the fully connect linear layers in the transformer encoder setup
+    "num_heads": 4,                         # number of attention heads in transformer layers
+    "num_layers": 8,                        # number of transformer encoding layers
+    "size_linear_layers": 512,              # size of the fully connect linear layers in the transformer encoder setup
     "conv_channels": [64, 128, 192, 256],   # convolutional channels for CNN picture extraction
     "save_images": False,                   # save images from CNN layer (for testing only, keep false for normal training)
     "output_dir": output_dir                # output directory for saving images (directory has to contain subfolder images)

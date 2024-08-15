@@ -62,6 +62,7 @@ class DeepQNetworkAgentv4:
         self.max_steps = agent_hyper_params['max_steps_episode'] * agent_hyper_params['n_episodes']
         self.update_every = agent_hyper_params['update_every']
         self.update_target = agent_hyper_params['update_target']
+        self.learn_start = agent_hyper_params['learn_start']
 
         # reward shaping settings
         self.reward_shaping = reward_shaping
@@ -143,15 +144,16 @@ class DeepQNetworkAgentv4:
         # Save experience in replay memory
         self.memory.push(state, action, reward, next_state, terminated, truncated)
 
-        # Learn every UPDATE_EVERY time steps.
-        step_modulo = self.step_count % self.update_every
-
         # Init loss
         loss = 0
 
-        if step_modulo == 0:
-            # If enough samples are available in memory, get random subset and learn
-            if len(self.memory) > self.update_target:
+        if episode > self.learn_start and len(self.memory) > self.update_target:
+
+            # Learn every UPDATE_EVERY time steps.
+            step_modulo = self.step_count % self.update_every
+
+            # If the modulo condition was met and the experiences buffer is not empty the learning process is performed
+            if step_modulo == 0:
                 experiences = self.memory.sample()
                 if experiences is not None:
                     loss = self.learn(experiences)
