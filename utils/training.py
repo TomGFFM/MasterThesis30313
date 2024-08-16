@@ -451,11 +451,11 @@ class AgentOptimizerv5:
                                  'count_predicted_actions': count_predicted_actions,
                                  'count_random_actions': count_random_actions,
                                  'total_no_steps': count_predicted_actions + count_random_actions,
-                                 'model_saved': mvg_avg_score > best_score,
+                                 'model_saved': mvg_avg_score > best_score and episode > self.hyper_params['learn_start'],
                                  'minimum_tau_in_episode': min(taus_in_episode),
                                  'minimum_lr_in_episode': min(lrs_in_episode)})
 
-            if mvg_avg_score > best_score:
+            if mvg_avg_score > best_score and episode > self.hyper_params['learn_start']:
                 best_score = mvg_avg_score
                 model_path = self.get_file_path(output_dir + '/models', f'best_model_episode_{episode}_score_{round(best_score,5)}.pth')
                 self.agent.save(model_path)  # Save the best model
