@@ -75,7 +75,7 @@ agent_hyper_params = {
     "replay_buffer_size": 100000,           # size of the replay buffer
     "tau": 0.01,                            # defines how fast the target network gets adjusted to the policy netw.
     "final_tau": 0.0001,                    # defines the lowest possible tau value
-    "learn_start": 100,                     # number of episodes which have to be played before the training starts
+    "learn_start": 1000,                    # number of episodes which have to be played before the training starts
     "update_every": 100,                    # number of steps after each the network gets update once all other conditions were met
     "update_target": 20000,                 # threshold of steps(actions) to start the replay (RP buffer has to bigger than this number before learn method is called)
     "n_episodes": 10000                     # number of episodes to play for the agent
