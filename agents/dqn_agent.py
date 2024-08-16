@@ -241,10 +241,7 @@ class DeepQNetworkAgentv4:
         self.df_final_q_metrics = pd.concat([self.df_final_q_metrics, df_q_metrics], ignore_index=True)
 
         # Compute loss
-        if self.loss_function_delta is None:
-            loss = self.loss_function(q_expected, q_targets)
-        else:
-            loss = self.loss_function(q_expected, q_targets, delta=self.loss_function_delta)
+        loss = self.loss_function(q_expected, q_targets)
 
         # Minimize the loss
         self.optimizer.zero_grad()
