@@ -74,10 +74,6 @@ ao = AgentOptimizer(agent=agent, env=env, hyperparameter=hyper_params, device=de
 ao.train(output_dir='../output')
 
 
-# :TODO additional networks transformers and lstms, augmented versions
-# :TODO test all networks
-# :TODO seperate jupyter notebook for cloud execution
-# :TODO quellen und beschreibungen für exponentielle zerfallsformel, warum macht diese sinn bei epsilon decay
 
 """
 Eine gute und sinnvolle Formel für die Epsilon-Decay-Strategie sollte folgende Eigenschaften aufweisen:
