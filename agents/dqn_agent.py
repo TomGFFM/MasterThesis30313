@@ -387,6 +387,7 @@ class DeepQNetworkAgentv5:
         self.max_steps = agent_hyper_params['max_steps_episode'] * agent_hyper_params['n_episodes']
         self.update_every = agent_hyper_params['update_every']
         self.update_target = agent_hyper_params['update_target']
+        self.learn_start = agent_hyper_params['learn_start']
 
         # reward shaping settings
         self.reward_shaping = reward_shaping
