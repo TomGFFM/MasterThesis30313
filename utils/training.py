@@ -373,13 +373,9 @@ class AgentOptimizerv5:
                 # Take the action and observe the next state, reward, and termination flags
                 next_state, reward, terminated, truncated, info = self.env.step(action)
                 logging.debug(f"reward before scaling: {reward}")
-                # if reward > 0:
-                #     print(f"reward before scaling: {reward}")
 
                 # Normalize the reward
                 reward = mscaler.fit_transform([[reward]])[0, 0]
-                # if reward > 0:
-                #     print(f"reward after scaling: {reward}")
                 logging.debug(f"reward after scaling: {reward}")
 
                 # Preprocess the next state
@@ -451,12 +447,12 @@ class AgentOptimizerv5:
                                  'count_predicted_actions': count_predicted_actions,
                                  'count_random_actions': count_random_actions,
                                  'total_no_steps': count_predicted_actions + count_random_actions,
-                                 'model_saved': mvg_avg_score > best_score and episode > self.hyper_params['learn_start'],
+                                 'model_saved': mvg_avg_score > score and episode > self.hyper_params['learn_start'],
                                  'minimum_tau_in_episode': min(taus_in_episode),
                                  'minimum_lr_in_episode': min(lrs_in_episode)})
 
-            if mvg_avg_score > best_score and episode > self.hyper_params['learn_start']:
-                best_score = mvg_avg_score
+            if score > best_score and episode > self.hyper_params['learn_start']:
+                best_score = score
                 model_path = self.get_file_path(output_dir + '/models', f'best_model_episode_{episode}_score_{round(best_score,5)}.pth')
                 self.agent.save(model_path)  # Save the best model
                 logging.info(f'New best model saved with score: {best_score:.2f}')
@@ -760,12 +756,12 @@ class AgentOptimizerv6:
                                  'count_predicted_actions': count_predicted_actions,
                                  'count_random_actions': count_random_actions,
                                  'total_no_steps': count_predicted_actions + count_random_actions,
-                                 'model_saved': mvg_avg_score > best_score and episode > agent_hyper_params['learn_start'],
+                                 'model_saved': score > best_score and episode > agent_hyper_params['learn_start'],
                                  'minimum_tau_in_episode': min(taus_in_episode),
                                  'minimum_lr_in_episode': min(lrs_in_episode)})
 
-            if mvg_avg_score > best_score and episode > agent_hyper_params['learn_start']:
-                best_score = mvg_avg_score
+            if score > best_score and episode > agent_hyper_params['learn_start']:
+                best_score = score
                 model_path = self.get_file_path(self.output_dir + '/models',
                                                 f'best_model_episode_{episode}_score_{round(best_score, 5)}.pth')
                 agent.save(model_path)  # Save the best model
@@ -779,7 +775,7 @@ class AgentOptimizerv6:
             agent.q_value_metrics.to_parquet(self.get_file_path(self.output_dir + '/metrics', f'q_metrics_trial_{trial_number}.pq'), index=False)
 
             # Report score to optuna
-            trial.report(mvg_avg_score, episode)
+            trial.report(score, episode)
 
             # Early stopping und Pruning für Optuna
             if trial.should_prune():
