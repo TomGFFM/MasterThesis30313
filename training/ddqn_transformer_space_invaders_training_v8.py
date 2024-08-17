@@ -72,7 +72,7 @@ agent_hyper_params = {
     "learning_rate_step_size": 250,         # decrease learning rate by lr gamma after so many steps (works only if lr_scheduler object was passed to agent)
     "learning_rate_gamma": 0.25,            # factor by which the lr is reduced after lr steps (works only if lr_scheduler object was passed to agent)
     "max_steps_episode": 3000,              # maximum actions to be expected within an episode
-    "replay_buffer_size": 100000,           # size of the replay buffer
+    "replay_buffer_size": 30000000,         # size of the replay buffer (max_steps_episode x n_episodes)
     "tau": 0.01,                            # defines how fast the target network gets adjusted to the policy netw.
     "final_tau": 0.0001,                    # defines the lowest possible tau value
     "learn_start": 1000,                    # number of episodes which have to be played before the training starts
