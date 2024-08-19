@@ -65,27 +65,30 @@ class Hyperparameters(object):
     def __init__(self):
         pass
 
-    def get_params(self, trial):
+    @staticmethod
+    def get_params(trial):
         agent_hyper_params = {
             "batch_size": trial.suggest_categorical("batch_size", [128, 256, 512]),                         # size of each batch pushed through the network
             "action_size": env.action_space.n,                                                              # number of allowed actions in game
             "epsilon_start": 0.99,                                                                          # start value for epsilon
             "epsilon_end": trial.suggest_float("epsilon_end", 0.1, 0.5),                                    # lowest possible epsilon value
-            "epsilon_decay": trial.suggest_float("epsilon_decay", 0.001, 0.05, log=True),                   # factor by which epsilon gets reduced
+            "epsilon_decay": trial.suggest_float("epsilon_decay", 0.005, 0.03, log=True),                   # factor by which epsilon gets reduced
             "gamma": 0.99,                                                                                  # how much are future rewards valued
-            "learning_rate": trial.suggest_float("learning_rate", 1e-5, 1e-2, log=True),                    # learning rate
-            "learning_rate_step_size": trial.suggest_int("learning_rate_step_size", 100, 500),              # decrease learning rate by lr gamma after so many steps (works only if lr_scheduler object was passed to agent)
-            "learning_rate_gamma": trial.suggest_float("learning_rate_gamma", 0.1, 0.5),                    # factor by which the lr is reduced after lr steps (works only if lr_scheduler object was passed to agent)
+            "learning_rate": trial.suggest_float("learning_rate", 0.00001, 0.001, log=True),                # learning rate
+            "learning_rate_step_size": trial.suggest_int("learning_rate_step_size", 100, 300),              # decrease learning rate by lr gamma after so many steps (works only if lr_scheduler object was passed to agent)
+            "learning_rate_gamma": trial.suggest_float("learning_rate_gamma", 0.2, 0.4),                    # factor by which the lr is reduced after lr steps (works only if lr_scheduler object was passed to agent)
             "max_steps_episode": 3000,                                                                      # maximum actions to be expected within an episode
-            "replay_buffer_size": 15000000,                                                                 # size of the replay buffer (max_steps_episode x n_episodes)
+            "replay_buffer_size": 375000,                                                                   # size of the replay buffer (max_steps_episode x n_episodes) / 20
             "tau": trial.suggest_float("tau", 1e-4, 1e-2, log=True),                                        # defines how fast the target network gets adjusted to the policy netw.
             "final_tau": 0.0001,                                                                            # defines the lowest possible tau value
-            "learn_start": 500,                                                                             # number of episodes which have to be played before the training starts
+            "learn_start": 250,                                                                             # number of episodes which have to be played before the training starts (10% of n_episodes)
             "update_every": trial.suggest_int("update_every", 50, 200),                                     # number of steps after each the network gets update once all other conditions were met
             "update_target": trial.suggest_int("update_target", 10000, 50000),                              # threshold of steps(actions) to start the replay (RP buffer has to bigger than this number before learn method is called)
-            "n_episodes": 5000,                                                                             # number of episodes to play for the agent
-            "optimizer_name": trial.suggest_categorical("optimizer", ["Adam", "NAdam", "SGD", "RMSprop"]),  # name of the optimizer to be used for loss optimization
-            "lr_scheduler_name": trial.suggest_categorical("lr_scheduler", ["cosine", "step", "none"]),     # name of learning rate scheduler to be used
+            "n_episodes": 2500,                                                                             # number of episodes to play for the agent
+            "optimizer_name": trial.suggest_categorical("optimizer", ["Adam", "NAdam", "SGD", "RMSprop",
+                                                                      "Adagrad", "Adadelta", "RAdam"]),     # name of the optimizer to be used for loss optimization
+            "lr_scheduler_name": trial.suggest_categorical("lr_scheduler", ["cosine", "step",
+                                                                            "reduce_on_plateau", "none"]),  # name of learning rate scheduler to be used
             "loss_name": trial.suggest_categorical("loss_function", ["huber", "mse", "l1"])                 # name of loss function to be used
         }
 
@@ -93,7 +96,7 @@ class Hyperparameters(object):
             "input_shape": (4, 90, 90),                                                                  # desired shape of state pictures
             "num_actions": env.action_space.n,                                                           # number of allowed actions in game
             "num_heads": trial.suggest_categorical("num_heads", [2, 4, 8, 16]),                          # number of attention heads in transformer layers
-            "num_layers": trial.suggest_int("num_layers", 4, 16),                                        # number of transformer encoding layers
+            "num_layers": trial.suggest_int("num_layers", 2, 4, 8, 16, 32),                              # number of transformer encoding layers
             "size_linear_layers": trial.suggest_categorical("size_linear_layers", [256, 512, 1024]),     # size of the fully connect linear layers in the transformer encoder setup
             "conv_channels": [64, 128, 192, 256],                                                        # convolutional channels for CNN picture extraction
             "save_images": False,                                                                        # save images from CNN layer (for testing only, keep false for normal training)
@@ -113,5 +116,5 @@ ao = AgentOptimizerv6(agent=DeepQNetworkAgentv4,
                       device=device,
                       output_dir=output_dir)
 
-ao.train()
+ao.train(n_trials=100, n_jobs=2, warmup_steps=250)
 

@@ -72,13 +72,13 @@ agent_hyper_params = {
     "learning_rate_step_size": 250,         # decrease learning rate by lr gamma after so many steps (works only if lr_scheduler object was passed to agent)
     "learning_rate_gamma": 0.25,            # factor by which the lr is reduced after lr steps (works only if lr_scheduler object was passed to agent)
     "max_steps_episode": 3000,              # maximum actions to be expected within an episode
-    "replay_buffer_size": 30000000,         # size of the replay buffer (max_steps_episode x n_episodes)
+    "replay_buffer_size": 300000,           # size of the replay buffer (max_steps_episode x n_episodes) / 20
     "tau": 0.01,                            # defines how fast the target network gets adjusted to the policy netw.
     "final_tau": 0.0001,                    # defines the lowest possible tau value
-    "learn_start": 1000,                    # number of episodes which have to be played before the training starts
+    "learn_start": 1,                       # number of episodes which have to be played before the training starts
     "update_every": 100,                    # number of steps after each the network gets update once all other conditions were met
     "update_target": 20000,                 # threshold of steps(actions) to start the replay (RP buffer has to bigger than this number before learn method is called)
-    "n_episodes": 10000                     # number of episodes to play for the agent
+    "n_episodes": 2000                      # number of episodes to play for the agent
 }
 
 network_hyper_params = {
@@ -111,7 +111,8 @@ if model_name:
 optimizer = optim.NAdam(policy_net.parameters(), lr=agent_hyper_params['learning_rate'])
 
 # Init lr scheduler (optional)
-lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=agent_hyper_params['n_episodes'], eta_min=0.000001)
+# lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=agent_hyper_params['n_episodes'], eta_min=0.000001)
+lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=0)
 
 # #####################################################
 # ################ init agent #########################

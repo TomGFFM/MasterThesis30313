@@ -67,10 +67,10 @@ agent_hyper_params = {
     "learning_rate_step_size": 250,         # decrease learning rate by lr gamma after so many steps (works only if lr_scheduler object was passed to agent)
     "learning_rate_gamma": 0.25,            # factor by which the lr is reduced after lr steps (works only if lr_scheduler object was passed to agent)
     "max_steps_episode": 3000,              # maximum actions to be expected within an episode
-    "replay_buffer_size": 100000,           # size of the replay buffer
+    "replay_buffer_size": 30000000,         # size of the replay buffer (max_steps_episode x n_episodes)
     "tau": 0.01,                            # defines how fast the target network gets adjusted to the policy netw.
     "final_tau": 0.0001,                    # defines the lowest possible tau value
-    "learn_start": 100,                     # number of episodes which have to be played before the training starts
+    "learn_start": 1000,                    # number of episodes which have to be played before the training starts
     "update_every": 100,                    # number of steps after each the network gets update once all other conditions were met
     "update_target": 20000,                 # threshold of steps(actions) to start the replay (RP buffer has to bigger than this number before learn method is called)
     "n_episodes": 10000                     # number of episodes to play for the agent
@@ -86,6 +86,7 @@ network_hyper_params = {
     "save_images": False,                   # save images from CNN layer (for testing only, keep false for normal training)
     "output_dir": output_dir                # output directory for saving images (directory has to contain subfolder images)
 }
+
 
 # #####################################################
 # ##### init networks, optimizers and co. #############
@@ -131,7 +132,7 @@ trained_agent = DeepQNetworkAgentv5(policy_net=policy_net,
                                     loss_function=F.smooth_l1_loss)
 
 # load pre-trained model into agent
-trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20240815_DDQAugmentedTransformerNNv8_best_model_episode_4995_score_17.17333.pth', map_location=device)
+trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20240817_DDQAugmentedTransformerNNv8_best_model_episode_1006_score_26.2.pth', map_location=device)
 
 output_size = network_hyper_params['input_shape'][1]
 

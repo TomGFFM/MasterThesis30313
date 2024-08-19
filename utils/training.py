@@ -1,5 +1,6 @@
 # import standards
 from datetime import datetime
+import gc
 import logging
 import numpy as np
 import math
@@ -447,11 +448,11 @@ class AgentOptimizerv5:
                                  'count_predicted_actions': count_predicted_actions,
                                  'count_random_actions': count_random_actions,
                                  'total_no_steps': count_predicted_actions + count_random_actions,
-                                 'model_saved': mvg_avg_score > score and episode > self.hyper_params['learn_start'],
+                                 'model_saved': mvg_avg_score > best_score and episode > self.hyper_params['learn_start'],
                                  'minimum_tau_in_episode': min(taus_in_episode),
                                  'minimum_lr_in_episode': min(lrs_in_episode)})
 
-            if score > best_score and episode > self.hyper_params['learn_start']:
+            if mvg_avg_score > best_score and episode > self.hyper_params['learn_start']:
                 best_score = score
                 model_path = self.get_file_path(output_dir + '/models', f'best_model_episode_{episode}_score_{round(best_score,5)}.pth')
                 self.agent.save(model_path)  # Save the best model
@@ -471,6 +472,8 @@ class AgentOptimizerv5:
         elif self.device == torch.device("mps"):
             torch.mps.empty_cache()
             logging.info(f"Cleared cache for: {self.device}")
+
+        gc.collect()
 
     def get_file_path(self, output_dir: str, filename: str) -> str:
         """
@@ -569,16 +572,26 @@ class AgentOptimizerv6:
         elif agent_hyper_params['optimizer_name'] == "SGD":
             optimizer = optim.SGD(policy_net.parameters(), lr=agent_hyper_params['learning_rate'], momentum=0.9,
                                   nesterov=True)
-        else:
+        elif agent_hyper_params['optimizer_name'] == "Adagrad":
+            optimizer = optim.Adagrad(policy_net.parameters(), lr=agent_hyper_params['learning_rate'])
+        elif agent_hyper_params['optimizer_name'] == "Adadelta":
+            optimizer = optim.Adadelta(policy_net.parameters(), lr=1.0)
+        elif agent_hyper_params['optimizer_name'] == "RAdam":
+            optimizer = optim.RAdam(policy_net.parameters(), lr=agent_hyper_params['learning_rate'])
+        elif agent_hyper_params['optimizer_name'] == "RMSprop":
             optimizer = optim.RMSprop(policy_net.parameters(), lr=agent_hyper_params['learning_rate'])
 
         # Init lr scheduler
         if agent_hyper_params['lr_scheduler_name'] == "cosine":
-            lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=agent_hyper_params['n_episodes'],
+            lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer,
+                                                                T_max=agent_hyper_params['n_episodes'],
                                                                 eta_min=0.000001)
         elif agent_hyper_params['lr_scheduler_name'] == "step":
-            lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=agent_hyper_params['learning_rate_step_size'],
+            lr_scheduler = optim.lr_scheduler.StepLR(optimizer,
+                                                     step_size=agent_hyper_params['learning_rate_step_size'],
                                                      gamma=agent_hyper_params['learning_rate_gamma'])
+        elif agent_hyper_params['lr_scheduler_name'] == "reduce_on_plateau":
+            lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer)
         else:
             lr_scheduler = None
 
@@ -621,7 +634,7 @@ class AgentOptimizerv6:
         # set file reference based on trial configuration and network base name
         model_name = policy_net.model_name
         trial_ref = f"trial_{trial_number}_{model_name}"
-        self.file_ref = f"{trial_ref}_{agent_hyper_params['batch_size']}_{agent_hyper_params['learning_rate']:.5f}_{network_hyper_params['num_heads']}heads_{network_hyper_params['num_layers']}layers_tau{agent_hyper_params['tau']:.5f}_optimizer_{agent_hyper_params['optimizer_name']}_scheduler_{agent_hyper_params['lr_scheduler_name']}_lossf_{agent_hyper_params['loss_name']}"
+        file_ref = f"{trial_ref}_{agent_hyper_params['batch_size']}_{agent_hyper_params['learning_rate']:.5f}_{network_hyper_params['num_heads']}heads_{network_hyper_params['num_layers']}layers_tau{agent_hyper_params['tau']:.5f}_optimizer_{agent_hyper_params['optimizer_name']}_scheduler_{agent_hyper_params['lr_scheduler_name']}_lossf_{agent_hyper_params['loss_name']}"
 
         # init agent
         agent = self.init_agent(policy_net, target_net, agent_hyper_params, network_hyper_params)
@@ -730,7 +743,8 @@ class AgentOptimizerv6:
                 mvg_avg_loss = np.mean(self.losses[-20:])
 
             # average_score = np.mean(self.scores_window)
-            logging.info(f'Episode: {episode}, '
+            logging.info(f'Optuna trial no.: {trial_number}, '
+                         f'Episode: {episode}, '
                          f'Average Score: {np.mean(self.scores):.5f}, '
                          f'Average Loss: {np.mean(self.losses):.5f}, '
                          f'Moving Average Score: {mvg_avg_score:.5f}, '
@@ -756,52 +770,61 @@ class AgentOptimizerv6:
                                  'count_predicted_actions': count_predicted_actions,
                                  'count_random_actions': count_random_actions,
                                  'total_no_steps': count_predicted_actions + count_random_actions,
-                                 'model_saved': score > best_score and episode > agent_hyper_params['learn_start'],
+                                 'model_saved': mvg_avg_score > best_score and episode > agent_hyper_params['learn_start'],
                                  'minimum_tau_in_episode': min(taus_in_episode),
                                  'minimum_lr_in_episode': min(lrs_in_episode)})
 
-            if score > best_score and episode > agent_hyper_params['learn_start']:
-                best_score = score
-                model_path = self.get_file_path(self.output_dir + '/models',
-                                                f'best_model_episode_{episode}_score_{round(best_score, 5)}.pth')
+            if mvg_avg_score > best_score and episode > agent_hyper_params['learn_start']:
+                best_score = mvg_avg_score
+                model_path = self.get_file_path(self.output_dir + '/models',f'{file_ref}_best_model_episode_{episode}_mvgavgscore_{round(best_score, 5)}.pth')
                 agent.save(model_path)  # Save the best model
                 logging.info(f'New best model saved with score: {best_score:.2f}')
 
             # Save non q-metrics to Parquet file
             df_metrics = pd.DataFrame(metrics_data)
-            df_metrics.to_parquet(self.get_file_path(self.output_dir + '/metrics', f'metrics_trial_{trial_number}.pq'), index=False)
+            df_metrics.to_parquet(self.get_file_path(self.output_dir + '/metrics', f'{file_ref}_metrics.pq'), index=False)
 
             # Save full set of q-metrics to Parquet file
-            agent.q_value_metrics.to_parquet(self.get_file_path(self.output_dir + '/metrics', f'q_metrics_trial_{trial_number}.pq'), index=False)
+            agent.q_value_metrics.to_parquet(self.get_file_path(self.output_dir + '/metrics', f'{file_ref}_q_metrics.pq'), index=False)
 
             # Report score to optuna
-            trial.report(score, episode)
+            trial.report(mvg_avg_score, episode)
 
             # Early stopping und Pruning für Optuna
             if trial.should_prune():
                 raise optuna.exceptions.TrialPruned()
 
-        # Clear cache based on the device
-        if self.device == torch.device("cuda"):
-            torch.cuda.empty_cache()
-            logging.info(f"Cleared cache for: {self.device}")
-        elif self.device == torch.device("mps"):
-            torch.mps.empty_cache()
-            logging.info(f"Cleared cache for: {self.device}")
+            # Clear cache based on the device
+            if self.device == torch.device("cuda"):
+                torch.cuda.empty_cache()
+                logging.debug(f"Cleared cache for: {self.device}")
+            elif self.device == torch.device("mps"):
+                torch.mps.empty_cache()
+                logging.debug(f"Cleared cache for: {self.device}")
 
-    def train(self, n_trials: int = 100) -> None:
+            gc.collect()
+
+        # Save final model of trial
+        model_path = self.get_file_path(self.output_dir + '/models', f'{file_ref}_final_model.pth')
+        agent.save(model_path)
+
+        return mvg_avg_score
+
+    def train(self, n_trials: int = 100, n_jobs: int = 2, warmup_steps: int = 500) -> None:
         """
         Search hyperparameter space with optuna and optimize the reward.
 
         Args:
             n_trials (int): The number of trials for optimizing the agent reward based on hyperparameters.
+            n_jobs (int): The number of parallel jobs for optimizing the agent reward based on hyperparameters.
+            warmup_steps (int): The number of warmup steps for optimizing the agent reward based on hyperparameters.
         """
 
         # set storage path to save study results
         study_storage_path = 'sqlite:///' + self.get_file_path(self.output_dir + '/optuna_study', f'{self.network_class.__name__}.db')
 
         # Define early stopping via pruning/ set n_warmup_steps to same as learn_start
-        pruner = optuna.pruners.MedianPruner(n_startup_trials=5, n_warmup_steps=500)
+        pruner = optuna.pruners.MedianPruner(n_startup_trials=1, n_warmup_steps=warmup_steps)
 
         # Create study
         study = optuna.create_study(study_name=f'{self.network_class.__name__}',
@@ -811,7 +834,7 @@ class AgentOptimizerv6:
                                     pruner=pruner)
 
         # start optimization
-        study.optimize(self.objective, n_trials=n_trials)
+        study.optimize(self.objective, n_trials=n_trials, n_jobs=n_jobs, gc_after_trial=True)
 
     def get_file_path(self, output_dir: str, filename: str) -> str:
         """
@@ -825,5 +848,5 @@ class AgentOptimizerv6:
             str: The file path with the current date and the model name.
         """
         current_date = datetime.now().strftime('%Y%m%d')
-        file_path = os.path.join(output_dir, f'{current_date}_{self.file_ref}_{filename}')
+        file_path = os.path.join(output_dir, f'{current_date}_{filename}')
         return file_path
