@@ -96,7 +96,7 @@ class Hyperparameters(object):
             "input_shape": (4, 90, 90),                                                                  # desired shape of state pictures
             "num_actions": env.action_space.n,                                                           # number of allowed actions in game
             "num_heads": trial.suggest_categorical("num_heads", [2, 4, 8, 16]),                          # number of attention heads in transformer layers
-            "num_layers": trial.suggest_int("num_layers", 2, 4, 8, 16, 32),                              # number of transformer encoding layers
+            "num_layers": trial.suggest_int("num_layers", 2, 32, step=2),                                # number of transformer encoding layers
             "size_linear_layers": trial.suggest_categorical("size_linear_layers", [256, 512, 1024]),     # size of the fully connect linear layers in the transformer encoder setup
             "conv_channels": [64, 128, 192, 256],                                                        # convolutional channels for CNN picture extraction
             "save_images": False,                                                                        # save images from CNN layer (for testing only, keep false for normal training)
