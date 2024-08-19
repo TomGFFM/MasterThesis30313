@@ -116,5 +116,5 @@ ao = AgentOptimizerv6(agent=DeepQNetworkAgentv4,
                       device=device,
                       output_dir=output_dir)
 
-ao.train(n_trials=100, n_jobs=3, warmup_steps=250)
+ao.train(n_trials=100, n_jobs=2, warmup_steps=250)
 
