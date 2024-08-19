@@ -44,8 +44,6 @@ class AgentOptimizerv4:
         self.env = env
         self.fp = FrameProcessor()
         self.hyper_params = hyperparameter
-        self.scores: List[float] = []  # Type hint for scores
-        self.losses: List[float] = []  # Type hint for losses
         self.device = device
         self.n_episodes: int = self.hyper_params["n_episodes"]  # Type hint for n_episodes
         self.network_hyper_params = network_hyper_params
@@ -99,6 +97,8 @@ class AgentOptimizerv4:
         best_score = 0
         mvg_avg_score = 0
         mvg_avg_loss = 0
+        scores: List[float] = []  # Type hint for scores
+        losses: List[float] = []  # Type hint for losses
 
         # Save agent hyperparameter configuration in filepath destination
         with open(output_dir + f'/metrics/{self.agent.agent_model}_agent_hyper_params.yaml', 'w') as yaml_file:
@@ -175,21 +175,21 @@ class AgentOptimizerv4:
                     break
 
             # Update scores and losses arrays
-            self.scores.append(score)
-            self.losses.append(loss)
+            scores.append(score)
+            losses.append(loss)
 
             # calc moving average score
-            if len(self.scores) >= 20:
-                mvg_avg_score = np.mean(self.scores[-20:])
+            if len(scores) >= 20:
+                mvg_avg_score = np.mean(scores[-20:])
 
             # calc moving average loss
-            if len(self.losses) >= 20:
-                mvg_avg_loss = np.mean(self.losses[-20:])
+            if len(losses) >= 20:
+                mvg_avg_loss = np.mean(losses[-20:])
 
-            # average_score = np.mean(self.scores_window)
+            # average_score = np.mean(scores_window)
             logging.info(f'Episode: {episode}, '
-                         f'Average Score: {np.mean(self.scores):.5f}, '
-                         f'Average Loss: {np.mean(self.losses):.5f}, '
+                         f'Average Score: {np.mean(scores):.5f}, '
+                         f'Average Loss: {np.mean(losses):.5f}, '
                          f'Moving Average Score: {mvg_avg_score:.5f}, '
                          f'Moving Average Loss: {mvg_avg_loss:.5f}, '
                          f'Episode Score: {score:.5f}, '
@@ -204,8 +204,8 @@ class AgentOptimizerv4:
             # Append current scores to collect metrics data
             metrics_data.append({'episode': episode,
                                  'epsilon': eps,
-                                 'avg_episode_score': np.mean(self.scores),
-                                 'avg_episode_loss': np.mean(self.losses),
+                                 'avg_episode_score': np.mean(scores),
+                                 'avg_episode_loss': np.mean(losses),
                                  'mvg_avg_score': mvg_avg_score,
                                  'mvg_avg_loss': mvg_avg_loss,
                                  'episode_score': score,
@@ -275,8 +275,6 @@ class AgentOptimizerv5:
         self.env = env
         self.fp = FrameProcessor()
         self.hyper_params = hyperparameter
-        self.scores: List[float] = []  # Type hint for scores
-        self.losses: List[float] = []  # Type hint for losses
         self.device = device
         self.n_episodes: int = self.hyper_params["n_episodes"]  # Type hint for n_episodes
         self.network_hyper_params = network_hyper_params
@@ -330,6 +328,8 @@ class AgentOptimizerv5:
         best_score = 0
         mvg_avg_score = 0
         mvg_avg_loss = 0
+        scores: List[float] = []
+        losses: List[float] = []
 
         # Save agent hyperparameter configuration in filepath destination
         with open(output_dir + f'/metrics/{self.agent.agent_model}_agent_hyper_params.yaml', 'w') as yaml_file:
@@ -410,21 +410,21 @@ class AgentOptimizerv5:
                     break
 
             # Update scores and losses arrays
-            self.scores.append(score)
-            self.losses.append(loss)
+            scores.append(score)
+            losses.append(loss)
 
             # calc moving average score
-            if len(self.scores) >= 20:
-                mvg_avg_score = np.mean(self.scores[-20:])
+            if len(scores) >= 20:
+                mvg_avg_score = np.mean(scores[-20:])
 
             # calc moving average loss
-            if len(self.losses) >= 20:
-                mvg_avg_loss = np.mean(self.losses[-20:])
+            if len(losses) >= 20:
+                mvg_avg_loss = np.mean(losses[-20:])
 
-            # average_score = np.mean(self.scores_window)
+            # average_score = np.mean(scores_window)
             logging.info(f'Episode: {episode}, '
-                         f'Average Score: {np.mean(self.scores):.5f}, '
-                         f'Average Loss: {np.mean(self.losses):.5f}, '
+                         f'Average Score: {np.mean(scores):.5f}, '
+                         f'Average Loss: {np.mean(losses):.5f}, '
                          f'Moving Average Score: {mvg_avg_score:.5f}, '
                          f'Moving Average Loss: {mvg_avg_loss:.5f}, '
                          f'Episode Score: {score:.5f}, '
@@ -439,8 +439,8 @@ class AgentOptimizerv5:
             # Append current scores to collect metrics data
             metrics_data.append({'episode': episode,
                                  'epsilon': eps,
-                                 'avg_episode_score': np.mean(self.scores),
-                                 'avg_episode_loss': np.mean(self.losses),
+                                 'avg_episode_score': np.mean(scores),
+                                 'avg_episode_loss': np.mean(losses),
                                  'mvg_avg_score': mvg_avg_score,
                                  'mvg_avg_loss': mvg_avg_loss,
                                  'episode_score': score,
@@ -513,8 +513,6 @@ class AgentOptimizerv6:
         self.env = env
         self.fp = FrameProcessor()
         self.hyperparameter = hyperparameter
-        self.scores: List[float] = []  # Type hint for scores
-        self.losses: List[float] = []  # Type hint for losses
         self.device = device
         self.output_dir = output_dir
         self.file_ref = ''
@@ -653,6 +651,8 @@ class AgentOptimizerv6:
         best_score = 0
         mvg_avg_score = 0
         mvg_avg_loss = 0
+        scores: List[float] = []  # Type hint for scores
+        losses: List[float] = []  # Type hint for losses
 
         # Save agent hyperparameter configuration in filepath destination
         with open(self.output_dir + f'/metrics/{trial_ref}_agent_hyper_params.yaml', 'w') as yaml_file:
@@ -731,22 +731,22 @@ class AgentOptimizerv6:
                     break
 
             # Update scores and losses arrays
-            self.scores.append(score)
-            self.losses.append(loss)
+            scores.append(score)
+            losses.append(loss)
 
             # calc moving average score
-            if len(self.scores) >= 20:
-                mvg_avg_score = np.mean(self.scores[-20:])
+            if len(scores) >= 20:
+                mvg_avg_score = np.mean(scores[-20:])
 
             # calc moving average loss
-            if len(self.losses) >= 20:
-                mvg_avg_loss = np.mean(self.losses[-20:])
+            if len(losses) >= 20:
+                mvg_avg_loss = np.mean(losses[-20:])
 
-            # average_score = np.mean(self.scores_window)
+            # average_score = np.mean(scores_window)
             logging.info(f'Optuna trial no.: {trial_number}, '
                          f'Episode: {episode}, '
-                         f'Average Score: {np.mean(self.scores):.5f}, '
-                         f'Average Loss: {np.mean(self.losses):.5f}, '
+                         f'Average Score: {np.mean(scores):.5f}, '
+                         f'Average Loss: {np.mean(losses):.5f}, '
                          f'Moving Average Score: {mvg_avg_score:.5f}, '
                          f'Moving Average Loss: {mvg_avg_loss:.5f}, '
                          f'Episode Score: {score:.5f}, '
@@ -761,8 +761,8 @@ class AgentOptimizerv6:
             # Append current scores to collect metrics data
             metrics_data.append({'episode': episode,
                                  'epsilon': eps,
-                                 'avg_episode_score': np.mean(self.scores),
-                                 'avg_episode_loss': np.mean(self.losses),
+                                 'avg_episode_score': np.mean(scores),
+                                 'avg_episode_loss': np.mean(losses),
                                  'mvg_avg_score': mvg_avg_score,
                                  'mvg_avg_loss': mvg_avg_loss,
                                  'episode_score': score,
