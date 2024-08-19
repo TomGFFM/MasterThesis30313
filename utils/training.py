@@ -810,7 +810,7 @@ class AgentOptimizerv6:
 
         return mvg_avg_score
 
-    def train(self, n_trials: int = 100, n_jobs: int = 2, warmup_steps: int = 500) -> None:
+    def train(self, n_trials: int = 100, n_jobs: int = 1, warmup_steps: int = 500) -> None:
         """
         Search hyperparameter space with optuna and optimize the reward.
 
