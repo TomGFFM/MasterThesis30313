@@ -453,7 +453,7 @@ class AgentOptimizerv5:
                                  'minimum_lr_in_episode': min(lrs_in_episode)})
 
             if mvg_avg_score > best_score and episode > self.hyper_params['learn_start']:
-                best_score = score
+                best_score = mvg_avg_score
                 model_path = self.get_file_path(output_dir + '/models', f'best_model_episode_{episode}_score_{round(best_score,5)}.pth')
                 self.agent.save(model_path)  # Save the best model
                 logging.info(f'New best model saved with score: {best_score:.2f}')
