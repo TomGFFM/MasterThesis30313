@@ -249,8 +249,10 @@ class DeepQNetworkAgentv4:
         self.optimizer.step()
 
         if self.lr_scheduler is not None:
-            self.lr_scheduler.step()
-            self.lr_step_value = self.optimizer.param_groups[0]['lr']
+            if isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                self.lr_scheduler.step(loss)
+            else:
+                self.lr_scheduler.step()
 
         # Update target network
         self.soft_update(self.policy_net, self.target_net)
