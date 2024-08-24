@@ -14,7 +14,7 @@ sys.path.append(project_dir)
 # import custom
 from agents import DeepQNetworkAgentv4
 from networks import DDQAugmentedTransformerNN
-from utils import AgentOptimizerv6
+from utils import AgentOptimizerOptuna
 
 # #####################################################
 # ################ output directory ###################
@@ -109,12 +109,12 @@ class Hyperparameters(object):
 # #####################################################
 # ################ train agent ########################
 # #####################################################
-ao = AgentOptimizerv6(agent=DeepQNetworkAgentv4,
-                      network=DDQAugmentedTransformerNN,
-                      env=env,
-                      hyperparameter=Hyperparameters,
-                      device=device,
-                      output_dir=output_dir)
+ao = AgentOptimizerOptuna(agent=DeepQNetworkAgentv4,
+                          network=DDQAugmentedTransformerNN,
+                          env=env,
+                          hyperparameter=Hyperparameters,
+                          device=device,
+                          output_dir=output_dir)
 
 ao.train(n_trials=100, n_jobs=2, warmup_steps=250)
 

@@ -82,13 +82,11 @@ class AgentOptimizerv4:
             output_dir (str): The directory to save the output files. Default is 'output'.
         """
         metrics_data: List[Dict] = []  # Initialize an empty list to store metrics data
-        eps = self.hyper_params['epsilon_start']
+        action_data: List[Dict] = []  # Initialize an empty list to store action data
 
         # initalize scaler for reward scaling to achieve consistent training situation (scaling from -1 to 1)
         mscaler = MaxAbsScaler()
         mscaler.fit(np.array([0, 1000]).reshape(-1, 1))
-        # mscaler = MinMaxScaler(feature_range=(0, 1))
-        # mscaler.fit(np.array([0, 1000]).reshape(-1, 1))
 
         # get expected picture shape for preprocessing correctly
         output_size = self.network_hyper_params['input_shape'][1]
@@ -97,8 +95,9 @@ class AgentOptimizerv4:
         best_score = 0
         mvg_avg_score = 0
         mvg_avg_loss = 0
-        scores: List[float] = []  # Type hint for scores
-        losses: List[float] = []  # Type hint for losses
+        scores: List[float] = []
+        losses: List[float] = []
+        # df_action_logs = pd.DataFrame()
 
         # Save agent hyperparameter configuration in filepath destination
         with open(output_dir + f'/metrics/{self.agent.agent_model}_agent_hyper_params.yaml', 'w') as yaml_file:
@@ -128,7 +127,15 @@ class AgentOptimizerv4:
 
             while True:
                 # Select an action based on the current state
-                action, action_type = self.agent.act(state, eps)
+                action, action_type, q_values_sum = self.agent.act(state, eps)
+
+                # Collect action data
+                action_data.append({'episode': episode,
+                                    'action': action,
+                                    'action_type': action_type,
+                                    'q_values_sum': q_values_sum})
+
+                # count predicted and randomized actions
                 if action_type == 'predicted':
                     count_predicted_actions += 1
                 elif action_type == 'randomized':
@@ -137,13 +144,10 @@ class AgentOptimizerv4:
                 # Take the action and observe the next state, reward, and termination flags
                 next_state, reward, terminated, truncated, info = self.env.step(action)
                 logging.debug(f"reward before scaling: {reward}")
-                # if reward > 0:
-                #     print(f"reward before scaling: {reward}")
 
                 # Normalize the reward
-                reward = mscaler.fit_transform([[reward]])[0, 0]
-                # if reward > 0:
-                #     print(f"reward after scaling: {reward}")
+                reward = mscaler.transform([[reward]])[0, 0]
+
                 logging.debug(f"reward after scaling: {reward}")
 
                 # Preprocess the next state
@@ -219,7 +223,7 @@ class AgentOptimizerv4:
 
             if mvg_avg_score > best_score:
                 best_score = mvg_avg_score
-                model_path = self.get_file_path(output_dir + '/models', f'best_model_episode_{episode}_score_{round(best_score,5)}.pth')
+                model_path = self.get_file_path(output_dir + '/models', f'best_model.pth')
                 self.agent.save(model_path)  # Save the best model
                 logging.info(f'New best model saved with score: {best_score:.2f}')
 
@@ -230,6 +234,10 @@ class AgentOptimizerv4:
             # Save full set of q-metrics to Parquet file
             self.agent.q_value_metrics.to_parquet(self.get_file_path(output_dir + '/metrics', 'q_metrics.pq'), index=False)
 
+            # Save action log dataframe
+            df_action_logs = pd.DataFrame(action_data)
+            df_action_logs.to_parquet(self.get_file_path(output_dir + '/metrics', 'action_logs.pq'), index=False)
+
         # Clear cache based on the device
         if self.device == torch.device("cuda"):
             torch.cuda.empty_cache()
@@ -237,6 +245,10 @@ class AgentOptimizerv4:
         elif self.device == torch.device("mps"):
             torch.mps.empty_cache()
             logging.info(f"Cleared cache for: {self.device}")
+
+        # Save final model of trial
+        model_path = self.get_file_path(output_dir + '/models', f'final_model.pth')
+        self.agent.save(model_path)
 
     def get_file_path(self, output_dir: str, filename: str) -> str:
         """
@@ -318,8 +330,6 @@ class AgentOptimizerv5:
         # initalize scaler for reward scaling to achieve consistent training situation (scaling from -1 to 1)
         mscaler = MaxAbsScaler()
         mscaler.fit(np.array([0, 1000]).reshape(-1, 1))
-        # mscaler = MinMaxScaler(feature_range=(0, 1))
-        # mscaler.fit(np.array([0, 1000]).reshape(-1, 1))
 
         # get expected picture shape for preprocessing correctly
         output_size = self.network_hyper_params['input_shape'][1]
@@ -376,7 +386,7 @@ class AgentOptimizerv5:
                 logging.debug(f"reward before scaling: {reward}")
 
                 # Normalize the reward
-                reward = mscaler.fit_transform([[reward]])[0, 0]
+                reward = mscaler.transform([[reward]])[0, 0]
                 logging.debug(f"reward after scaling: {reward}")
 
                 # Preprocess the next state
@@ -491,7 +501,7 @@ class AgentOptimizerv5:
         return file_path
 
 
-class AgentOptimizerv6:
+class AgentOptimizerOptuna:
     """
     A class for training the Deep Q-Network (DQN) agent.
     """
@@ -698,7 +708,7 @@ class AgentOptimizerv6:
                 logging.debug(f"reward before scaling: {reward}")
 
                 # Normalize the reward
-                reward = mscaler.fit_transform([[reward]])[0, 0]
+                reward = mscaler.transform([[reward]])[0, 0]
                 logging.debug(f"reward after scaling: {reward}")
 
                 # Preprocess the next state
@@ -776,7 +786,7 @@ class AgentOptimizerv6:
 
             if mvg_avg_score > best_score and episode > agent_hyper_params['learn_start']:
                 best_score = mvg_avg_score
-                model_path = self.get_file_path(self.output_dir + '/models',f'{file_ref}_best_model_episode_{episode}_mvgavgscore_{round(best_score, 5)}.pth')
+                model_path = self.get_file_path(self.output_dir + '/models',f'{file_ref}_best_model.pth')
                 agent.save(model_path)  # Save the best model
                 logging.info(f'New best model saved with score: {best_score:.2f}')
 

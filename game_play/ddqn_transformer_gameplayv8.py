@@ -145,14 +145,14 @@ state = fp.preprocess(stacked_frames=None,
 
 while True:
     env.render()
-    action, _ = trained_agent.act(state)
+    action, _ = trained_agent.act(state, eps=0.0, eval_mode=True)
     next_state, reward, terminated, truncated, info = env.step(action)
     score += reward
     state = fp.preprocess(stacked_frames=state,
-                               env_state=next_state,
-                               exclude=(8, -12, -12, 4),
-                               output=output_size,
-                               is_new=False)
+                          env_state=next_state,
+                          exclude=(8, -12, -12, 4),
+                          output=output_size,
+                          is_new=False)
 
     if terminated:
         print("You Final score is:", score)
