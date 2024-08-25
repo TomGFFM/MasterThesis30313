@@ -10,9 +10,9 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 # import custom
-from agents import DeepQNetworkAgentvPrioritized
+from agents import DeepQNetworkAgentPrioritized
 from networks import DDQAugmentedTransformerNN
-from utils import FrameProcessor, AgentOptimizerv4
+from utils import FrameProcessor, AgentOptimizerClassic
 
 # #####################################################
 # ################ output directory ###################
@@ -118,18 +118,18 @@ lr_scheduler = None
 fp = FrameProcessor()
 
 # init agent
-trained_agent = DeepQNetworkAgentvPrioritized(policy_net=policy_net,
-                                              target_net=target_net,
-                                              action_size=env.action_space.n,
-                                              device=device,
-                                              agent_hyper_params=agent_hyper_params,
-                                              network_hyper_params=network_hyper_params,
-                                              optimizer=optimizer,
-                                              lr_scheduler=lr_scheduler,
-                                              reward_shaping=True,
-                                              reward_factor=1.5,
-                                              punish_factor=1.6,
-                                              loss_function=F.huber_loss)
+trained_agent = DeepQNetworkAgentPrioritized(policy_net=policy_net,
+                                             target_net=target_net,
+                                             action_size=env.action_space.n,
+                                             device=device,
+                                             agent_hyper_params=agent_hyper_params,
+                                             network_hyper_params=network_hyper_params,
+                                             optimizer=optimizer,
+                                             lr_scheduler=lr_scheduler,
+                                             reward_shaping=True,
+                                             reward_factor=1.5,
+                                             punish_factor=1.6,
+                                             loss_function=F.huber_loss)
 
 # load pre-trained model into agent
 trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20240824_DDQAugmentedTransformerNNv8PrioReplay_best_model.pth', map_location=device)
@@ -145,7 +145,7 @@ state = fp.preprocess(stacked_frames=None,
 
 while True:
     env.render()
-    action, _, _ = trained_agent.act(state, eps=0.0, eval_mode=False)
+    action, _, _ = trained_agent.act(state, eps=0.0, eval_mode=True)
     print(f'action: {action}')
     next_state, reward, terminated, truncated, info = env.step(action)
     score += reward

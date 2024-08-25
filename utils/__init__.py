@@ -1,3 +1,3 @@
 from .preprocessing import FrameProcessor
-from .replay_buffer import ReplayBuffer, ReplayBufferWithFrames, PrioritizedReplayBuffer
-from .training import AgentOptimizerv4, AgentOptimizerv5, AgentOptimizerOptuna
+from .replay_buffer import ReplayBuffer, PrioritizedReplayBuffer
+from .training import AgentOptimizerClassic, AgentOptimizerClassicNoisy, AgentOptimizerOptuna, AgentOptimizerOptunaNoisy

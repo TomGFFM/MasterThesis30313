@@ -14,9 +14,9 @@ project_dir = os.path.dirname(os.getcwd())
 sys.path.append(project_dir)
 
 # import custom
-from agents import DeepQNetworkAgentvPrioritized
+from agents import DeepQNetworkAgentPrioritized
 from networks import DDQAugmentedTransformerNN
-from utils import FrameProcessor, AgentOptimizerv4
+from utils import AgentOptimizerClassic
 
 # #####################################################
 # ################ output directory ###################
@@ -75,8 +75,8 @@ agent_hyper_params = {
     "replay_buffer_size": 300000,           # size of the replay buffer (max_steps_episode x n_episodes) / 20
     "tau": 0.01,                            # defines how fast the target network gets adjusted to the policy netw.
     "final_tau": 0.0001,                    # defines the lowest possible tau value
-    "learn_start": 50,                     # number of episodes which have to be played before the training starts
-    "update_every": 100,                    # number of steps after each the network gets update once all other conditions were met
+    "learn_start": 50,                      # number of episodes which have to be played before the training starts
+    "update_every": 100,                    # number of steps after each the network gets updated once all other conditions were met
     "soft_update_target": 200,              # threshold of steps(actions) to start the soft update of the target network
     "n_episodes": 1500                      # number of episodes to play for the agent
 }
@@ -118,30 +118,27 @@ lr_scheduler = None
 # #####################################################
 # ################ init agent #########################
 # #####################################################
-# initialize frame processor for preprocess the game images and for stacking the frames
-fp = FrameProcessor()
-
 # init agent
-agent = DeepQNetworkAgentvPrioritized(policy_net=policy_net,
-                                      target_net=target_net,
-                                      action_size=env.action_space.n,
-                                      device=device,
-                                      agent_hyper_params=agent_hyper_params,
-                                      network_hyper_params=network_hyper_params,
-                                      optimizer=optimizer,
-                                      lr_scheduler=lr_scheduler,
-                                      reward_shaping=True,
-                                      reward_factor=1.5,
-                                      punish_factor=1.6,
-                                      loss_function=F.huber_loss)
+agent = DeepQNetworkAgentPrioritized(policy_net=policy_net,
+                                     target_net=target_net,
+                                     action_size=env.action_space.n,
+                                     device=device,
+                                     agent_hyper_params=agent_hyper_params,
+                                     network_hyper_params=network_hyper_params,
+                                     optimizer=optimizer,
+                                     lr_scheduler=lr_scheduler,
+                                     reward_shaping=True,
+                                     reward_factor=1.5,
+                                     punish_factor=1.6,
+                                     loss_function=F.huber_loss)
 
 # #####################################################
 # ################ train agent ########################
 # #####################################################
-ao = AgentOptimizerv4(agent=agent,
-                      env=env,
-                      hyperparameter=agent_hyper_params,
-                      network_hyper_params=network_hyper_params,
-                      device=device)
+ao = AgentOptimizerClassic(agent=agent,
+                           env=env,
+                           hyperparameter=agent_hyper_params,
+                           network_hyper_params=network_hyper_params,
+                           device=device)
 
 ao.train(output_dir=output_dir)

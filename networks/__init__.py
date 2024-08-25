@@ -1,5 +1,4 @@
 from .cnns import DQNetworkCNN, DDQNetworkCNN, CNNExtractor
-from .transformers import DDQAugmentedTransformerNN, DDQAugmentedTransformerNNv2
+from .noisy import NoisyLinear
+from .transformers import DDQAugmentedTransformerNN, DDQAugmentedNoisyTransformerNN
 from .lstms import DDQAugmentedLSTMNN
-
-
