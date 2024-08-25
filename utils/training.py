@@ -663,7 +663,7 @@ class AgentOptimizerOptuna:
 
             while True:
                 # Select an action based on the current state
-                action, action_type, q_values_sum = self.agent.act(state, eps)
+                action, action_type, q_values_sum = agent.act(state, eps)
 
                 # Collect action data
                 action_data.append({'episode': episode,
@@ -1014,7 +1014,7 @@ class AgentOptimizerOptunaNoisy:
 
             while True:
                 # Select an action based on the current state
-                action, action_type, q_values_sum = self.agent.act(state)
+                action, action_type, q_values_sum = agent.act(state)
 
                 # Collect action data
                 action_data.append({'episode': episode,
