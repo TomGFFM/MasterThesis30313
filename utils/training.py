@@ -20,7 +20,7 @@ import optuna
 from optuna import Trial
 
 # custom
-from utils import FrameProcessor
+from utils import FrameProcessor, OptimizerSelector, LossFunctionSelector, LRSchedulerSelector
 
 
 class AgentOptimizerClassic:
@@ -545,43 +545,16 @@ class AgentOptimizerOptuna:
             """
 
         # Init optimizer
-        if agent_hyper_params['optimizer_name'] == "Adam":
-            optimizer = optim.Adam(policy_net.parameters(), lr=agent_hyper_params['learning_rate'])
-        elif agent_hyper_params['optimizer_name'] == "NAdam":
-            optimizer = optim.NAdam(policy_net.parameters(), lr=agent_hyper_params['learning_rate'])
-        elif agent_hyper_params['optimizer_name'] == "SGD":
-            optimizer = optim.SGD(policy_net.parameters(), lr=agent_hyper_params['learning_rate'], momentum=0.9,
-                                  nesterov=True)
-        elif agent_hyper_params['optimizer_name'] == "Adagrad":
-            optimizer = optim.Adagrad(policy_net.parameters(), lr=agent_hyper_params['learning_rate'])
-        elif agent_hyper_params['optimizer_name'] == "Adadelta":
-            optimizer = optim.Adadelta(policy_net.parameters(), lr=1.0)
-        elif agent_hyper_params['optimizer_name'] == "RAdam":
-            optimizer = optim.RAdam(policy_net.parameters(), lr=agent_hyper_params['learning_rate'])
-        elif agent_hyper_params['optimizer_name'] == "RMSprop":
-            optimizer = optim.RMSprop(policy_net.parameters(), lr=agent_hyper_params['learning_rate'])
+        oselector = OptimizerSelector()
+        optimizer = oselector(agent_hyper_params=agent_hyper_params, network=policy_net)
 
-        # Init lr scheduler
-        if agent_hyper_params['lr_scheduler_name'] == "cosine":
-            lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer,
-                                                                T_max=agent_hyper_params['n_episodes'],
-                                                                eta_min=0.000001)
-        elif agent_hyper_params['lr_scheduler_name'] == "step":
-            lr_scheduler = optim.lr_scheduler.StepLR(optimizer,
-                                                     step_size=agent_hyper_params['learning_rate_step_size'],
-                                                     gamma=agent_hyper_params['learning_rate_gamma'])
-        elif agent_hyper_params['lr_scheduler_name'] == "reduce_on_plateau":
-            lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer)
-        else:
-            lr_scheduler = None
+        # Init lr scheduler (optional)
+        lrselector = LRSchedulerSelector()
+        lr_scheduler = lrselector(agent_hyper_params=agent_hyper_params, optimizer=optimizer)
 
         # Init loss function
-        if agent_hyper_params['loss_name'] == "huber":
-            loss_function = F.smooth_l1_loss
-        elif agent_hyper_params['loss_name'] == "mse":
-            loss_function = F.mse_loss
-        else:
-            loss_function = F.l1_loss
+        lfselector = LossFunctionSelector()
+        loss_function = lfselector(agent_hyper_params=agent_hyper_params)
 
         # init agent
         agent = self.agent_class(policy_net=policy_net,
@@ -866,8 +839,11 @@ class AgentOptimizerOptunaNoisy:
         self.output_dir = output_dir
         self.file_ref = ''
 
-    def init_agent(self, policy_net: torch.nn.Module, target_net: torch.nn.Module,
-                   agent_hyper_params: Dict, network_hyper_params: Dict,) -> object:
+    def init_agent(self,
+                   policy_net: torch.nn.Module,
+                   target_net: torch.nn.Module,
+                   agent_hyper_params: Dict,
+                   network_hyper_params: Dict,) -> object:
 
         """
             Initializes and returns a Deep Q-Network (DQN) agent with specified configurations.
@@ -895,46 +871,21 @@ class AgentOptimizerOptunaNoisy:
                 learning_rate_step_size (int): The step size for the learning rate scheduler (used if `lr_scheduler_name` is "step").
                 learning_rate_gamma (float): The gamma value for the learning rate scheduler (used if `lr_scheduler_name` is "step").
                 loss_name (str): The loss function to use (options: "huber", "mse", "l1").
+                reward_factor (float): The reward factor to use.
+                punish_factor (float): The punishment factor to use.
             """
 
         # Init optimizer
-        if agent_hyper_params['optimizer_name'] == "Adam":
-            optimizer = optim.Adam(policy_net.parameters(), lr=agent_hyper_params['learning_rate'])
-        elif agent_hyper_params['optimizer_name'] == "NAdam":
-            optimizer = optim.NAdam(policy_net.parameters(), lr=agent_hyper_params['learning_rate'])
-        elif agent_hyper_params['optimizer_name'] == "SGD":
-            optimizer = optim.SGD(policy_net.parameters(), lr=agent_hyper_params['learning_rate'], momentum=0.9,
-                                  nesterov=True)
-        elif agent_hyper_params['optimizer_name'] == "Adagrad":
-            optimizer = optim.Adagrad(policy_net.parameters(), lr=agent_hyper_params['learning_rate'])
-        elif agent_hyper_params['optimizer_name'] == "Adadelta":
-            optimizer = optim.Adadelta(policy_net.parameters(), lr=1.0)
-        elif agent_hyper_params['optimizer_name'] == "RAdam":
-            optimizer = optim.RAdam(policy_net.parameters(), lr=agent_hyper_params['learning_rate'])
-        elif agent_hyper_params['optimizer_name'] == "RMSprop":
-            optimizer = optim.RMSprop(policy_net.parameters(), lr=agent_hyper_params['learning_rate'])
+        oselector = OptimizerSelector()
+        optimizer = oselector(agent_hyper_params=agent_hyper_params, network=policy_net)
 
-        # Init lr scheduler
-        if agent_hyper_params['lr_scheduler_name'] == "cosine":
-            lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer,
-                                                                T_max=agent_hyper_params['n_episodes'],
-                                                                eta_min=0.000001)
-        elif agent_hyper_params['lr_scheduler_name'] == "step":
-            lr_scheduler = optim.lr_scheduler.StepLR(optimizer,
-                                                     step_size=agent_hyper_params['learning_rate_step_size'],
-                                                     gamma=agent_hyper_params['learning_rate_gamma'])
-        elif agent_hyper_params['lr_scheduler_name'] == "reduce_on_plateau":
-            lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer)
-        else:
-            lr_scheduler = None
+        # Init lr scheduler (optional)
+        lrselector = LRSchedulerSelector()
+        lr_scheduler = lrselector(agent_hyper_params=agent_hyper_params, optimizer=optimizer)
 
         # Init loss function
-        if agent_hyper_params['loss_name'] == "huber":
-            loss_function = F.smooth_l1_loss
-        elif agent_hyper_params['loss_name'] == "mse":
-            loss_function = F.mse_loss
-        else:
-            loss_function = F.l1_loss
+        lfselector = LossFunctionSelector()
+        loss_function = lfselector(agent_hyper_params=agent_hyper_params)
 
         # init agent
         agent = self.agent_class(policy_net=policy_net,
@@ -946,8 +897,8 @@ class AgentOptimizerOptunaNoisy:
                                  optimizer=optimizer,
                                  lr_scheduler=lr_scheduler,
                                  reward_shaping=True,
-                                 reward_factor=1.5,
-                                 punish_factor=1.6,
+                                 reward_factor=agent_hyper_params['reward_factor'],
+                                 punish_factor=agent_hyper_params['punish_factor'],
                                  loss_function=loss_function)
 
         return agent
@@ -966,8 +917,7 @@ class AgentOptimizerOptunaNoisy:
 
         # set file reference based on trial configuration and network base name
         model_name = policy_net.model_name
-        trial_ref = f"trial_{trial_number}_{model_name}"
-        file_ref = f"{trial_ref}_{agent_hyper_params['batch_size']}_{agent_hyper_params['learning_rate']:.5f}_{network_hyper_params['num_heads']}heads_{network_hyper_params['num_layers']}layers_tau{agent_hyper_params['tau']:.5f}_optimizer_{agent_hyper_params['optimizer_name']}_scheduler_{agent_hyper_params['lr_scheduler_name']}_lossf_{agent_hyper_params['loss_name']}"
+        file_ref = f"trial_{trial_number}_{model_name}"
 
         # init agent
         agent = self.init_agent(policy_net, target_net, agent_hyper_params, network_hyper_params)
@@ -989,11 +939,11 @@ class AgentOptimizerOptunaNoisy:
         action_data: List[Dict] = []
 
         # Save agent hyperparameter configuration in filepath destination
-        with open(self.output_dir + f'/metrics/{trial_ref}_agent_hyper_params.yaml', 'w') as yaml_file:
+        with open(self.output_dir + f'/metrics/{file_ref}_agent_hyper_params.yaml', 'w') as yaml_file:
             yaml.dump(agent_hyper_params, yaml_file, default_flow_style=False)
 
         # Save network hyperparameter configuration in filepath destination
-        with open(self.output_dir + f'/metrics/{trial_ref}_network_hyper_params.yaml', 'w') as yaml_file:
+        with open(self.output_dir + f'/metrics/{file_ref}_network_hyper_params.yaml', 'w') as yaml_file:
             yaml.dump(network_hyper_params, yaml_file, default_flow_style=False)
 
         for episode in range(1, agent_hyper_params['n_episodes'] + 1):
@@ -1139,7 +1089,7 @@ class AgentOptimizerOptunaNoisy:
         model_path = self.get_file_path(self.output_dir + '/models', f'{file_ref}_final_model.pth')
         agent.save(model_path)
 
-        return mvg_avg_score
+        return best_score
 
     def train(self, n_trials: int = 100, n_jobs: int = 1, warmup_steps: int = 500) -> None:
         """
