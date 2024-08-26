@@ -75,8 +75,8 @@ class Hyperparameters(object):
             "learning_rate_step_size": trial.suggest_int("learning_rate_step_size", 100, 300),              # decrease learning rate by lr gamma after so many steps (works only if lr_scheduler object was passed to agent)
             "learning_rate_gamma": trial.suggest_float("learning_rate_gamma", 0.2, 0.4),                    # factor by which the lr is reduced after lr steps (works only if lr_scheduler object was passed to agent)
             "max_steps_episode": 2000,                                                                      # maximum actions to be expected within an episode
-            "replay_buffer_size": trial.suggest_categorical("batch_size", [1000, 5000, 10000,
-                                                                           50000, 100000]),                 # size of the replay buffer
+            "replay_buffer_size": trial.suggest_categorical("replay_buffer_size", [1000, 5000, 10000,
+                                                                                   50000, 100000]),         # size of the replay buffer
             "tau": trial.suggest_float("tau", 1e-4, 1e-2, log=True),                                        # defines how fast the target network gets adjusted to the policy netw.
             "final_tau": 0.0001,                                                                            # defines the lowest possible tau value
             "learn_start": 15,                                                                              # number of episodes which have to be played before the training starts (10% of n_episodes)
