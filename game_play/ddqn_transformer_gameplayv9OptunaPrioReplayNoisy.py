@@ -51,8 +51,8 @@ env = gym.make("ALE/SpaceInvaders-v5", render_mode="human")
 # #####################################################
 # ################ init hyperparameter ################
 # #####################################################
-agent_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output/metrics/trial_13_DDQAugmentedNoisyTransformerNN_agent_hyper_params.yaml', 'r')
-network_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output/metrics/trial_13_DDQAugmentedNoisyTransformerNN_network_hyper_params.yaml', 'r')
+agent_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output/metrics/trial_17_DDQAugmentedNoisyTransformerNN_agent_hyper_params.yaml', 'r')
+network_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output/metrics/trial_17_DDQAugmentedNoisyTransformerNN_network_hyper_params.yaml', 'r')
 agent_hyper_params = yaml.load(agent_params_file, Loader=yaml.FullLoader)
 network_hyper_params = yaml.load(network_params_file, Loader=yaml.FullLoader)
 
@@ -105,7 +105,7 @@ trained_agent = DeepQNetworkAgentPrioritized(policy_net=policy_net,
                                              loss_function=loss_function)
 
 # load pre-trained model into agent
-trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20240826_trial_13_DDQAugmentedNoisyTransformerNN_256_0.00024_2heads_26layers_tau0.00027_optimizer_RAdam_scheduler_cosine_lossf_huber_best_model_score_0.344_episode_957.pth', map_location=device)
+trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20240831_trial_17_DDQAugmentedNoisyTransformerNN_best_model_score_0.368_episode_40.pth', map_location=device)
 
 output_size = network_hyper_params['input_shape'][1]
 
@@ -118,7 +118,7 @@ state = fp.preprocess(stacked_frames=None,
 
 while True:
     env.render()
-    action, _, _ = trained_agent.act(state, eval_mode=False)
+    action, _, _ = trained_agent.act(state, eval_mode=True)
     print(f'action: {action}')
     next_state, reward, terminated, truncated, info = env.step(action)
     score += reward

@@ -74,7 +74,7 @@ class Hyperparameters(object):
             "learning_rate": trial.suggest_float("learning_rate", 0.00001, 0.001, log=True),                # learning rate
             "learning_rate_step_size": trial.suggest_int("learning_rate_step_size", 100, 300),              # decrease learning rate by lr gamma after so many steps (works only if lr_scheduler object was passed to agent)
             "learning_rate_gamma": trial.suggest_float("learning_rate_gamma", 0.2, 0.4),                    # factor by which the lr is reduced after lr steps (works only if lr_scheduler object was passed to agent)
-            "max_steps_episode": 3000,                                                                      # maximum actions to be expected within an episode
+            "max_steps_episode": 2000,                                                                      # maximum actions to be expected within an episode
             "replay_buffer_size": trial.suggest_categorical("replay_buffer_size", [1000, 5000, 10000,
                                                                                    50000, 100000]),         # size of the replay buffer
             "tau": trial.suggest_float("tau", 1e-5, 1e-1, log=True),                                        # defines how fast the target network gets adjusted to the policy netw.
@@ -82,7 +82,7 @@ class Hyperparameters(object):
             "learn_start": 15,                                                                              # number of episodes which have to be played before the training starts (10% of n_episodes)
             "update_every": trial.suggest_int("update_every", 50, 200),                                     # number of steps after each the network gets updated once all other conditions were met
             "soft_update_target": trial.suggest_int("soft_update_target", 100, 500),                        # threshold of steps(actions) to start the soft update of the target network
-            "n_episodes": 2000,                                                                             # number of episodes to play for the agent
+            "n_episodes": 3000,                                                                             # number of episodes to play for the agent
             "optimizer_name": trial.suggest_categorical("optimizer", ["Adam", "NAdam", "SGD", "RMSprop",
                                                                       "Adagrad", "Adadelta", "RAdam"]),     # name of the optimizer to be used for loss optimization
             "lr_scheduler_name": trial.suggest_categorical("lr_scheduler", ["cosine", "step",
