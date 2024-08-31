@@ -6,6 +6,8 @@ server_setup/*
 ./server_setup/*
 /output/models/*
 /output/*
+/output_remote/*
 /tracker.py
 
 /_old/
+/output_remote/
