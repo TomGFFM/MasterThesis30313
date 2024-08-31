@@ -170,8 +170,18 @@ class DDQAugmentedNoisyTransformerNN(nn.Module):
             output_dir (str): The directory to save the output images from CNNExtractor.
                               Default: 'output'
     """
-    def __init__(self, input_shape: tuple, num_actions, num_heads=8, num_layers=6, size_linear_layers=512,
-                 conv_channels: list = [32, 64, 128, 256], dropout_linear: float = 0.3, sigma_init: float = 0.017, save_images: bool = False, output_dir: str = './output'):
+    def __init__(self,
+                 input_shape: tuple,
+                 num_actions,
+                 num_heads=8,
+                 num_layers=6,
+                 size_linear_layers=512,
+                 conv_channels: list = [32, 64, 128, 256],
+                 dropout_linear: float = 0.3,
+                 sigma_init: float = 0.017,
+                 save_images: bool = False,
+                 output_dir: str = './output'):
+
         super(DDQAugmentedNoisyTransformerNN, self).__init__()
 
         self.input_shape = input_shape
