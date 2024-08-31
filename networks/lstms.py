@@ -176,6 +176,9 @@ class DDQAugmentedNoisyLSTMNN(nn.Module):
         self.num_channels = conv_channels[-1]  # number of channels from the last CNN layer
         self.seq_length = self.calculate_seq_length(input_shape)  # calculate the sequence length based on input shape
 
+        # Init layer normalization
+        self.layer_norm = nn.LayerNorm(hidden_size, elementwise_affine=True)
+
         # LSTM layers for sequence processing
         self.lstm_layers = nn.LSTM(
             input_size=self.num_channels,
@@ -186,7 +189,7 @@ class DDQAugmentedNoisyLSTMNN(nn.Module):
 
         # Define Noisy layers for advantage value computation
         self.advantage = nn.Sequential(
-            NoisyLinear(in_features=self.num_channels * self.seq_length,
+            NoisyLinear(in_features=hidden_size,
                         out_features=size_linear_layers,
                         sigma_init=sigma_init),
             nn.ReLU(),
@@ -198,7 +201,7 @@ class DDQAugmentedNoisyLSTMNN(nn.Module):
 
         # Define Noisy layers for state value computation
         self.value = nn.Sequential(
-            NoisyLinear(in_features=self.num_channels * self.seq_length,
+            NoisyLinear(in_features=hidden_size,
                         out_features=size_linear_layers,
                         sigma_init=sigma_init),
             nn.ReLU(),
@@ -243,7 +246,7 @@ class DDQAugmentedNoisyLSTMNN(nn.Module):
         x = x[:, -1, :]
 
         # apply layer normalization
-        x = nn.LayerNorm(x.size()[1:], elementwise_affine=False)(x)
+        x = self.layer_norm(x)
         logging.debug(f"Shape after layer normalization: {x.shape}")
 
         # compute advantage values

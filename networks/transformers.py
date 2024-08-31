@@ -45,6 +45,9 @@ class DDQAugmentedTransformerNN(nn.Module):
         self.num_channels = conv_channels[-1]  # number of channels from the last CNN layer
         self.seq_length = self.calculate_seq_length(input_shape)  # calculate the sequence length based on input shape
 
+        # Layer normalization (apply after transformer layers)
+        self.layer_norm = nn.LayerNorm(self.num_channels * self.seq_length, elementwise_affine=True)
+
         # stack of transformer encoder layers for deep sequence processing
         self.transformer_encoders = nn.ModuleList([
             nn.TransformerEncoderLayer(d_model=self.num_channels, nhead=num_heads) for _ in range(num_layers)
@@ -104,7 +107,7 @@ class DDQAugmentedTransformerNN(nn.Module):
         logging.debug(f"Shape after view to remove sequence dimension: {x.shape}")
 
         # apply layer normalization
-        x = nn.LayerNorm(x.size()[1:], elementwise_affine=False)(x)
+        x = self.layer_norm(x)
         logging.debug(f"Shape after layer normalization: {x.shape}")
 
         # compute advantage values
@@ -195,6 +198,9 @@ class DDQAugmentedNoisyTransformerNN(nn.Module):
         self.num_channels = conv_channels[-1]  # number of channels from the last CNN layer
         self.seq_length = self.calculate_seq_length(input_shape)  # calculate the sequence length based on input shape
 
+        # Layer normalization (apply after transformer layers)
+        self.layer_norm = nn.LayerNorm(self.num_channels * self.seq_length, elementwise_affine=True)
+
         # stack of transformer encoder layers for deep sequence processing
         self.transformer_encoders = nn.ModuleList([
             nn.TransformerEncoderLayer(d_model=self.num_channels, nhead=num_heads) for _ in range(num_layers)
@@ -262,7 +268,7 @@ class DDQAugmentedNoisyTransformerNN(nn.Module):
         logging.debug(f"Shape after view to remove sequence dimension: {x.shape}")
 
         # apply layer normalization
-        x = nn.LayerNorm(x.size()[1:], elementwise_affine=False)(x)
+        x = self.layer_norm(x)
         logging.debug(f"Shape after layer normalization: {x.shape}")
 
         # compute advantage values
