@@ -1086,8 +1086,8 @@ class AgentOptimizerOptunaNoisy:
             gc.collect()
 
         # Save final model of trial
-        model_path = self.get_file_path(self.output_dir + '/models', f'{file_ref}_final_model.pth')
-        agent.save(model_path)
+        # model_path = self.get_file_path(self.output_dir + '/models', f'{file_ref}_final_model.pth')
+        # agent.save(model_path)
 
         return best_score
 
