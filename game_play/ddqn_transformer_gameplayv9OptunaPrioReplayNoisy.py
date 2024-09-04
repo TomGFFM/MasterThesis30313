@@ -105,7 +105,7 @@ trained_agent = DeepQNetworkAgentPrioritized(policy_net=policy_net,
                                              loss_function=loss_function)
 
 # load pre-trained model into agent
-trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20240831_trial_17_DDQAugmentedNoisyTransformerNN_best_model_score_0.368_episode_40.pth', map_location=device)
+trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20240901_trial_17_DDQAugmentedNoisyTransformerNN.pth', map_location=device)
 
 output_size = network_hyper_params['input_shape'][1]
 

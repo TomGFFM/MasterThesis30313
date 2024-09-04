@@ -88,8 +88,8 @@ class Hyperparameters(object):
             "lr_scheduler_name": trial.suggest_categorical("lr_scheduler", ["cosine", "step",
                                                                             "reduce_on_plateau", "none"]),  # name of learning rate scheduler to be used
             "loss_name": trial.suggest_categorical("loss_function", ["huber", "mse", "l1"]),                # name of loss function to be used
-            "reward_factor": trial.suggest_float("reward_factor", 0.5, 2.5),                                # factor which improves the reward in reward shaping
-            "punish_factor": trial.suggest_float("punish_factor", 0.5, 2.5),                                # factor which decreases the reward in reward shaping
+            "reward_factor": 1.2,                                                                           # factor which improves the reward in reward shaping
+            "punish_factor": 1.4,                                                                           # factor which decreases the reward in reward shaping
         }
 
         network_hyper_params = {
