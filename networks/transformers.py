@@ -3,7 +3,7 @@ import numpy as np
 
 import torch
 import torch.nn as nn
-from networks import CNNExtractor, NoisyLinear
+from networks import CNNExtractor, CNNExtractorLean, NoisyLinear
 
 
 class DDQAugmentedTransformerNN(nn.Module):
@@ -27,11 +27,23 @@ class DDQAugmentedTransformerNN(nn.Module):
                               Default: [32, 64, 128, 256]
         save_images (bool): Whether to save the output images of each convolutional layer in CNNExtractor.
                             Default: False
+        lean_cnn (bool): Whether to use a Lean CNN layer in CNNExtractor.
+                         Default: False
         output_dir (str): The directory to save the output images from CNNExtractor.
                           Default: 'output'
     """
-    def __init__(self, input_shape: tuple, num_actions, num_heads=8, num_layers=6, size_linear_layers=512,
-                 conv_channels: list = [32, 64, 128, 256], dropout_linear: float = 0.3, save_images: bool = False, output_dir: str = './output'):
+    def __init__(self,
+                 input_shape: tuple,
+                 num_actions: int,
+                 num_heads: int = 8,
+                 num_layers: int = 6,
+                 size_linear_layers: int = 512,
+                 conv_channels: list = [32, 64, 128, 256],
+                 dropout_linear: float = 0.3,
+                 save_images: bool = False,
+                 lean_cnn: bool = False,
+                 output_dir: str = './output'):
+
         super(DDQAugmentedTransformerNN, self).__init__()
 
         self.input_shape = input_shape
@@ -39,7 +51,10 @@ class DDQAugmentedTransformerNN(nn.Module):
         self._model_name = 'DDQAugmentedTransformerNN'
 
         # cnn layer for feature extraction
-        self.cnnex = CNNExtractor(input_shape, conv_channels, save_images, output_dir)
+        if lean_cnn:
+            self.cnnex = CNNExtractorLean(input_shape, conv_channels, save_images, output_dir)
+        else:
+            self.cnnex = CNNExtractor(input_shape, conv_channels, save_images, output_dir)
 
         # calculate the dimensionality of the feature vector
         self.num_channels = conv_channels[-1]  # number of channels from the last CNN layer
@@ -170,19 +185,22 @@ class DDQAugmentedNoisyTransformerNN(nn.Module):
                                   Default: [32, 64, 128, 256]
             save_images (bool): Whether to save the output images of each convolutional layer in CNNExtractor.
                                 Default: False
+            lean_cnn (bool): Whether to use a Lean CNN layer in CNNExtractor.
+                             Default: False
             output_dir (str): The directory to save the output images from CNNExtractor.
                               Default: 'output'
     """
     def __init__(self,
                  input_shape: tuple,
-                 num_actions,
-                 num_heads=8,
-                 num_layers=6,
-                 size_linear_layers=512,
+                 num_actions: int,
+                 num_heads: int = 8,
+                 num_layers: int = 6,
+                 size_linear_layers: int = 512,
                  conv_channels: list = [32, 64, 128, 256],
                  dropout_linear: float = 0.3,
                  sigma_init: float = 0.017,
                  save_images: bool = False,
+                 lean_cnn: bool = False,
                  output_dir: str = './output'):
 
         super(DDQAugmentedNoisyTransformerNN, self).__init__()
@@ -192,7 +210,10 @@ class DDQAugmentedNoisyTransformerNN(nn.Module):
         self._model_name = 'DDQAugmentedNoisyTransformerNN'
 
         # cnn layer for feature extraction
-        self.cnnex = CNNExtractor(input_shape, conv_channels, save_images, output_dir)
+        if lean_cnn:
+            self.cnnex = CNNExtractorLean(input_shape, conv_channels, save_images, output_dir)
+        else:
+            self.cnnex = CNNExtractor(input_shape, conv_channels, save_images, output_dir)
 
         # calculate the dimensionality of the feature vector
         self.num_channels = conv_channels[-1]  # number of channels from the last CNN layer

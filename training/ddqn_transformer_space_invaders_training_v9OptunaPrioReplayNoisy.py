@@ -54,7 +54,7 @@ logging.info(f"Device was set to: {device}")
 output_dir = '../output'
 
 # initialize the gym environment
-env = gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array")
+env = gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array", frameskip=1)
 
 
 # #####################################################
@@ -88,19 +88,20 @@ class Hyperparameters(object):
             "lr_scheduler_name": trial.suggest_categorical("lr_scheduler", ["cosine", "step",
                                                                             "reduce_on_plateau", "none"]),  # name of learning rate scheduler to be used
             "loss_name": trial.suggest_categorical("loss_function", ["huber", "mse", "l1"]),                # name of loss function to be used
-            "reward_factor": 1.2,                                                                           # factor which improves the reward in reward shaping
-            "punish_factor": 1.4,                                                                           # factor which decreases the reward in reward shaping
+            "reward_factor": 1.0,                                                                           # factor which improves the reward in reward shaping
+            "punish_factor": 1.0,                                                                           # factor which decreases the reward in reward shaping
         }
 
         network_hyper_params = {
-            "input_shape": (4, 90, 90),                                                                     # desired shape of state pictures
+            "input_shape": (4, 160, 160),                                                                   # desired shape of state pictures
             "num_actions": env.action_space.n,                                                              # number of allowed actions in game
             "num_heads": trial.suggest_categorical("num_heads", [2, 4, 8, 16]),                             # number of attention heads in transformer layers
             "num_layers": trial.suggest_int("num_layers", 2, 32, step=2),                                   # number of transformer encoding layers
             "size_linear_layers": trial.suggest_categorical("size_linear_layers", [128, 256, 512, 1024]),   # size of the fully connect linear layers in the transformer encoder setup
             "dropout_linear": trial.suggest_float("dropout_linear", 0.005, 0.5),                            # dropout rate in linear layer
             "sigma_init": trial.suggest_float('sigma_init', 0.001, 0.5, log=True),                          # sigma value for the noisy network; higher sigma increases noise in network
-            "conv_channels": [64, 128, 192, 256],                                                           # convolutional channels for CNN picture extraction
+            "conv_channels": [128, 256, 384, 512],                                                          # convolutional channels for CNN picture extraction
+            "lean_cnn": True,                                                                               # Inits a lean version of the CNN layer which only has the first and the last conv layer but less abstraction (so careful usage)
             "save_images": False,                                                                           # save images from CNN layer (for testing only, keep false for normal training)
             "output_dir": output_dir                                                                        # output directory for saving images (directory has to contain subfolder images)
         }

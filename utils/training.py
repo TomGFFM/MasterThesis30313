@@ -20,7 +20,7 @@ import optuna
 from optuna import Trial
 
 # custom
-from utils import FrameProcessor, OptimizerSelector, LossFunctionSelector, LRSchedulerSelector
+from utils import FrameProcessor, FrameProcessorDynamic, OptimizerSelector, LossFunctionSelector, LRSchedulerSelector
 
 
 class AgentOptimizerClassic:
@@ -833,7 +833,6 @@ class AgentOptimizerOptunaNoisy:
         self.agent_class = agent
         self.network_class = network
         self.env = env
-        self.fp = FrameProcessor()
         self.hyperparameter = hyperparameter
         self.device = device
         self.output_dir = output_dir
@@ -929,6 +928,9 @@ class AgentOptimizerOptunaNoisy:
         # get expected picture shape for preprocessing correctly
         output_size = network_hyper_params['input_shape'][1]
 
+        # init dynamic frameprocessor for pre-processing
+        fp = FrameProcessorDynamic(num_stacked_frames=network_hyper_params['input_shape'][0])
+
         # init pre-episode scores and other metrics
         best_score = 0
         mvg_avg_score = 0
@@ -956,11 +958,11 @@ class AgentOptimizerOptunaNoisy:
             count_actions = 0
 
             # Preprocess the initial state
-            state = self.fp.preprocess(stacked_frames=None,
-                                       env_state=self.env.reset()[0],
-                                       exclude=(8, -12, -12, 4),
-                                       output=output_size,
-                                       is_new=True)
+            state = fp.preprocess(stacked_frames=None,
+                                  env_state=self.env.reset()[0],
+                                  exclude=(8, -12, -12, 4),
+                                  output=output_size,
+                                  is_new=True)
 
             while True:
                 # Select an action based on the current state
@@ -984,11 +986,11 @@ class AgentOptimizerOptunaNoisy:
                 logging.debug(f"reward after scaling: {reward}")
 
                 # Preprocess the next state
-                next_state = self.fp.preprocess(stacked_frames=state,
-                                                env_state=next_state,
-                                                exclude=(8, -12, -12, 4),
-                                                output=output_size,
-                                                is_new=False)
+                next_state = fp.preprocess(stacked_frames=state,
+                                           env_state=next_state,
+                                           exclude=(8, -12, -12, 4),
+                                           output=output_size,
+                                           is_new=False)
 
                 # Update the agent with the observed transition
                 updated_loss, updated_reward, step_tau, step_lr = agent.step(state=state,

@@ -55,7 +55,7 @@ logging.info(f"Device was set to: {device}")
 output_dir = '../output'
 
 # initialize the gym environment
-env = gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array")
+env = gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array", frameskip=1)
 
 # #####################################################
 # ################ init hyperparameter ################
@@ -78,14 +78,15 @@ agent_hyper_params = {
 }
 
 network_hyper_params = {
-    "input_shape": (4, 90, 90),             # desired shape of state pictures
+    "input_shape": (6, 512, 512),           # desired shape of state pictures
     "num_actions": env.action_space.n,      # number of allowed actions in game
     "num_heads": 8,                         # number of attention heads in transformer layers
     "num_layers": 16,                       # number of transformer encoding layers
     "size_linear_layers": 1024,             # size of the fully connect linear layers in the transformer encoder setup
-    "conv_channels": [64, 128, 192, 256],   # convolutional channels for CNN picture extraction
+    "conv_channels": [384, 512, 640, 768],  # convolutional channels for CNN picture extraction
     "dropout_linear": 0.017,                # dropout rate in linear layer
     "sigma_init": 0.3,                      # sigma value for the noisy network; higher sigma increases noise in network
+    "lean_cnn": False,                      # Inits a lean version of the CNN layer which only has the first and the last conv layer but less abstraction (so careful usage)
     "save_images": False,                   # save images from CNN layer (for testing only, keep false for normal training)
     "output_dir": output_dir                # output directory for saving images (directory has to contain subfolder images)
 }

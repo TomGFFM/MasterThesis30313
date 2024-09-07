@@ -51,8 +51,8 @@ env = gym.make("ALE/SpaceInvaders-v5", render_mode="human")
 # #####################################################
 # ################ init hyperparameter ################
 # #####################################################
-agent_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote/metrics/trial_85_DDQAugmentedNoisyLSTMNN_agent_hyper_params.yaml', 'r')
-network_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote/metrics/trial_85_DDQAugmentedNoisyLSTMNN_network_hyper_params.yaml', 'r')
+agent_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote/metrics/trial_51_DDQAugmentedNoisyLSTMNN_agent_hyper_params.yaml', 'r')
+network_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote/metrics/trial_51_DDQAugmentedNoisyLSTMNN_network_hyper_params.yaml', 'r')
 agent_hyper_params = yaml.load(agent_params_file, Loader=yaml.FullLoader)
 network_hyper_params = yaml.load(network_params_file, Loader=yaml.FullLoader)
 
@@ -105,7 +105,7 @@ trained_agent = DeepQNetworkAgentPrioritized(policy_net=policy_net,
                                              loss_function=loss_function)
 
 # load pre-trained model into agent
-trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output_remote/models/20240902_trial_85_DDQAugmentedNoisyLSTMNN_final_model.pth', map_location=device)
+trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output_remote/models/20240905_trial_51_DDQAugmentedNoisyLSTMNN.pth', map_location=device)
 
 output_size = network_hyper_params['input_shape'][1]
 

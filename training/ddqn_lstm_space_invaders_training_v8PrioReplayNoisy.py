@@ -53,7 +53,7 @@ logging.info(f"Device was set to: {device}")
 output_dir = '../output'
 
 # initialize the gym environment
-env = gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array")
+env = gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array", frameskip=1)
 
 # #####################################################
 # ################ init hyperparameter ################
@@ -84,6 +84,7 @@ network_hyper_params = {
     "conv_channels": [64, 128, 192, 256],   # convolutional channels for CNN picture extraction
     "dropout_linear": 0.017,                # dropout rate in linear layer
     "sigma_init": 0.3,                      # sigma value for the noisy network; higher sigma increases noise in network
+    "lean_cnn": False,                      # Inits a lean version of the CNN layer which only has the first and the last conv layer but less abstraction (so careful usage)
     "save_images": False,                   # save images from CNN layer (for testing only, keep false for normal training)
     "output_dir": output_dir                # output directory for saving images (directory has to contain subfolder images)
 }

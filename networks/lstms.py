@@ -2,7 +2,7 @@ import logging
 
 import torch
 import torch.nn as nn
-from networks import CNNExtractor, NoisyLinear
+from networks import CNNExtractor, CNNExtractorLean, NoisyLinear
 
 
 class DDQAugmentedLSTMNN(nn.Module):
@@ -26,12 +26,22 @@ class DDQAugmentedLSTMNN(nn.Module):
                               Default: [32, 64, 128, 256]
         save_images (bool): Whether to save the output images of each convolutional layer in CNNExtractor.
                             Default: False
+        lean_cnn (bool): Whether to use a Lean CNN layer in CNNExtractor.
+                         Default: False
         output_dir (str): The directory to save the output images from CNNExtractor.
                           Default: 'output'
     """
 
-    def __init__(self, input_shape: tuple, num_actions, hidden_size=256, num_layers=2,
-                 conv_channels: list = [32, 64, 128, 256], save_images: bool = False, output_dir: str = './output'):
+    def __init__(self,
+                 input_shape: tuple,
+                 num_actions: int,
+                 hidden_size: int = 256,
+                 num_layers: int = 2,
+                 conv_channels: list = [32, 64, 128, 256],
+                 save_images: bool = False,
+                 lean_cnn: bool = False,
+                 output_dir: str = './output'):
+
         super(DDQAugmentedLSTMNN, self).__init__()
 
         self.input_shape = input_shape
@@ -39,7 +49,11 @@ class DDQAugmentedLSTMNN(nn.Module):
         self._model_name = 'DDQAugmentedLSTMNN'
 
         # cnn layer for feature extraction
-        self.cnnex = CNNExtractor(input_shape, conv_channels, save_images, output_dir)
+        if lean_cnn:
+            self.cnnex = CNNExtractorLean(input_shape, conv_channels, save_images, output_dir)
+        else:
+            self.cnnex = CNNExtractor(input_shape, conv_channels, save_images, output_dir)
+
 
         # calculate the dimensionality of the feature vector
         self.num_channels = conv_channels[-1]  # number of channels from the last CNN layer
@@ -147,20 +161,23 @@ class DDQAugmentedNoisyLSTMNN(nn.Module):
                               Default: [32, 64, 128, 256]
         save_images (bool): Whether to save the output images of each convolutional layer in CNNExtractor.
                             Default: False
+        lean_cnn (bool): Whether to use a Lean CNN layer in CNNExtractor.
+                         Default: False
         output_dir (str): The directory to save the output images from CNNExtractor.
                           Default: 'output'
     """
 
     def __init__(self,
                  input_shape: tuple,
-                 num_actions,
-                 hidden_size=256,
-                 num_layers=6,
-                 size_linear_layers=512,
+                 num_actions: int,
+                 hidden_size: int = 256,
+                 num_layers: int = 6,
+                 size_linear_layers: int = 512,
                  conv_channels: list = [32, 64, 128, 256],
                  dropout_linear: float = 0.3,
                  sigma_init: float = 0.017,
                  save_images: bool = False,
+                 lean_cnn: bool = False,
                  output_dir: str = './output'):
 
         super(DDQAugmentedNoisyLSTMNN, self).__init__()
@@ -170,7 +187,10 @@ class DDQAugmentedNoisyLSTMNN(nn.Module):
         self._model_name = 'DDQAugmentedNoisyLSTMNN'
 
         # cnn layer for feature extraction
-        self.cnnex = CNNExtractor(input_shape, conv_channels, save_images, output_dir)
+        if lean_cnn:
+            self.cnnex = CNNExtractorLean(input_shape, conv_channels, save_images, output_dir)
+        else:
+            self.cnnex = CNNExtractor(input_shape, conv_channels, save_images, output_dir)
 
         # calculate the dimensionality of the feature vector
         self.num_channels = conv_channels[-1]  # number of channels from the last CNN layer
