@@ -100,8 +100,8 @@ class Hyperparameters(object):
             "size_linear_layers": trial.suggest_categorical("size_linear_layers", [128, 256, 512, 1024]),   # size of the fully connect linear layers in the transformer encoder setup
             "dropout_linear": trial.suggest_float("dropout_linear", 0.005, 0.5),                            # dropout rate in linear layer
             "sigma_init": trial.suggest_float('sigma_init', 0.001, 0.5, log=True),                          # sigma value for the noisy network; higher sigma increases noise in network
-            "conv_channels": [32, 64, 128, 192],                                                           # convolutional channels for CNN picture extraction
-            "lean_cnn": True,                                                                              # Inits a lean version of the CNN layer which only has the first and the last conv layer but less abstraction (so careful usage)
+            "conv_channels": [32, 64, 128, 192],                                                            # convolutional channels for CNN picture extraction
+            "lean_cnn": trial.suggest_categorical("lean_cnn", [True, False]),                               # Inits a lean version of the CNN layer which only has the first and the last conv layer but less abstraction (so careful usage)
             "save_images": True,                                                                            # save images from CNN layer (for testing only, keep false for normal training)
             "output_dir": output_dir                                                                        # output directory for saving images (directory has to contain subfolder images)
         }
@@ -119,5 +119,5 @@ ao = AgentOptimizerOptunaNoisy(agent=DeepQNetworkAgentPrioritizedNoisy,
                                device=device,
                                output_dir=output_dir)
 
-ao.train(n_trials=100, n_jobs=1, warmup_steps=50)
+ao.train(n_trials=50, n_jobs=1, warmup_steps=50)
 

@@ -93,15 +93,15 @@ class Hyperparameters(object):
         }
 
         network_hyper_params = {
-            "input_shape": (4, 160, 160),                                                                   # desired shape of state pictures
+            "input_shape": (4, 80, 80),                                                                   # desired shape of state pictures
             "num_actions": env.action_space.n,                                                              # number of allowed actions in game
             "num_heads": trial.suggest_categorical("num_heads", [2, 4, 8, 16]),                             # number of attention heads in transformer layers
             "num_layers": trial.suggest_int("num_layers", 2, 32, step=2),                                   # number of transformer encoding layers
             "size_linear_layers": trial.suggest_categorical("size_linear_layers", [128, 256, 512, 1024]),   # size of the fully connect linear layers in the transformer encoder setup
             "dropout_linear": trial.suggest_float("dropout_linear", 0.005, 0.5),                            # dropout rate in linear layer
             "sigma_init": trial.suggest_float('sigma_init', 0.001, 0.5, log=True),                          # sigma value for the noisy network; higher sigma increases noise in network
-            "conv_channels": [128, 256, 384, 512],                                                          # convolutional channels for CNN picture extraction
-            "lean_cnn": True,                                                                               # Inits a lean version of the CNN layer which only has the first and the last conv layer but less abstraction (so careful usage)
+            "conv_channels": [32, 64, 128, 192],                                                            # convolutional channels for CNN picture extraction
+            "lean_cnn": trial.suggest_categorical("lean_cnn", [True, False]),                                                                               # Inits a lean version of the CNN layer which only has the first and the last conv layer but less abstraction (so careful usage)
             "save_images": False,                                                                           # save images from CNN layer (for testing only, keep false for normal training)
             "output_dir": output_dir                                                                        # output directory for saving images (directory has to contain subfolder images)
         }
@@ -119,5 +119,5 @@ ao = AgentOptimizerOptunaNoisy(agent=DeepQNetworkAgentPrioritizedNoisy,
                                device=device,
                                output_dir=output_dir)
 
-ao.train(n_trials=100, n_jobs=1, warmup_steps=50)
+ao.train(n_trials=50, n_jobs=1, warmup_steps=50)
 
