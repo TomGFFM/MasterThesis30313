@@ -1,15 +1,14 @@
-server_setup/*
-./output/model_extractions/*
-./output/models/*
-/.idea
-/.idea/*
-.idea
-.idea/*
-./server_setup/*
-/output/models/*
-/output/*
-/output_remote/*
-/tracker.py
+# Ignore everything starting with 'output' (any directory or file)
+output*/
 
-/_old/
-/output_remote/
+# Ignore server_setup directory and everything under it
+server_setup/
+
+# Ignore specific file
+tracker.py
+
+# Ignore the .idea directory and everything under it
+.idea/
+
+# Ignore the _old directory
+_old/
