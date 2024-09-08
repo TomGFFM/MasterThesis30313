@@ -1,6 +1,8 @@
 server_setup/*
 ./output/model_extractions/*
 ./output/models/*
+/.idea
+/.idea/*
 .idea
 .idea/*
 ./server_setup/*
