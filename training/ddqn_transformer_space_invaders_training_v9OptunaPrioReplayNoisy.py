@@ -102,7 +102,7 @@ class Hyperparameters(object):
             "sigma_init": trial.suggest_float('sigma_init', 0.001, 0.5, log=True),                          # sigma value for the noisy network; higher sigma increases noise in network
             "conv_channels": [8, 0, 0, 32],                                                               # convolutional channels for CNN picture extraction (if lean ccn True only first and last channel config is used)
             "lean_cnn": True, # trial.suggest_categorical("lean_cnn", [True, False]),                       # Inits a lean version of the CNN layer which only has the first and the last conv channel but less abstraction (so careful usage)
-            "save_images": True,                                                                            # save images from CNN layer (for testing only, keep false for normal training)
+            "save_images": False,                                                                            # save images from CNN layer (for testing only, keep false for normal training)
             "output_dir": output_dir                                                                        # output directory for saving images (directory has to contain subfolder images)
         }
 
