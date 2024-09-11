@@ -55,42 +55,42 @@ logging.info(f"Device was set to: {device}")
 output_dir = '../output'
 
 # initialize the gym environment
-env = gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array")
+env = gym.make("ALE/SpaceInvaders-v5", render_mode="rgb_array", frameskip=1)
 
 # #####################################################
 # ################ init hyperparameter ################
 # #####################################################
 agent_hyper_params = {
-    "batch_size": 128,                      # size of each batch pushed through the network
-    "action_size": env.action_space.n,      # number of allowed actions in game
-    "gamma": 0.99,                          # how much are future rewards valued
-    "learning_rate": 0.000228122767056231,                 # learning rate
-    "learning_rate_step_size": 279,         # decrease learning rate by lr gamma after so many steps (works only if lr_scheduler object was passed to agent)
-    "learning_rate_gamma": 0.30376675080524373,            # factor by which the lr is reduced after lr steps (works only if lr_scheduler object was passed to agent)
-    "max_steps_episode": 3000,              # maximum actions to be expected within an episode
-    "replay_buffer_size": 1000,           # size of the replay buffer (max_steps_episode x n_episodes) / 20
-    "tau": 0.03586454851041,                            # defines how fast the target network gets adjusted to the policy netw.
-    "final_tau": 0.0001,                    # defines the lowest possible tau value
-    "learn_start": 3,                      # number of episodes which have to be played before the training starts
-    "update_every": 134,                    # number of steps after each the network gets updated once all other conditions were met
-    "soft_update_target": 205,              # threshold of steps(actions) to start the soft update of the target network
-    "n_episodes": 100                      # number of episodes to play for the agent
+    "batch_size": 128,                          # size of each batch pushed through the network
+    "action_size": env.action_space.n,          # number of allowed actions in game
+    "gamma": 0.99,                              # how much are future rewards valued
+    "learning_rate": 0.000228122767056231,      # learning rate
+    "learning_rate_step_size": 279,             # decrease learning rate by lr gamma after so many steps (works only if lr_scheduler object was passed to agent)
+    "learning_rate_gamma": 0.30376675080524373, # factor by which the lr is reduced after lr steps (works only if lr_scheduler object was passed to agent)
+    "max_steps_episode": 3000,                  # maximum actions to be expected within an episode
+    "replay_buffer_size": 1000,                 # size of the replay buffer (max_steps_episode x n_episodes) / 20
+    "tau": 0.03586454851041,                    # defines how fast the target network gets adjusted to the policy netw.
+    "final_tau": 0.0001,                        # defines the lowest possible tau value
+    "learn_start": 3,                           # number of episodes which have to be played before the training starts
+    "update_every": 134,                        # number of steps after each the network gets updated once all other conditions were met
+    "soft_update_target": 205,                  # threshold of steps(actions) to start the soft update of the target network
+    "n_episodes": 100                           # number of episodes to play for the agent
 }
 
 network_hyper_params = {
-    "input_shape": (4, 72, 72),           # desired shape of state pictures
-    "num_actions": env.action_space.n,      # number of allowed actions in game
-    "num_heads": 4,                         # number of attention heads in transformer layers
-    "num_layers": 2,                       # number of transformer encoding layers
-    "size_linear_layers": 128,             # size of the fully connect linear layers in the transformer encoder setup
-    # "conv_channels": [8, 0, 0, 32],  # convolutional channels for CNN picture extraction
-    # "conv_channels": [8, 16, 32, 64],  # convolutional channels for CNN picture extraction
-    "conv_channels": [384, 512, 640, 768],  # convolutional channels for CNN picture extraction
-    "dropout_linear": 0.31390469911775365,                # dropout rate in linear layer
-    "sigma_init": 0.05,                      # sigma value for the noisy network; higher sigma increases noise in network
-    "lean_cnn": False,                      # Inits a lean version of the CNN layer which only has the first and the last conv layer but less abstraction (so careful usage)
-    "save_images": False,                   # save images from CNN layer (for testing only, keep false for normal training)
-    "output_dir": output_dir                # output directory for saving images (directory has to contain subfolder images)
+    "input_shape": (4, 72, 72),                 # desired shape of state pictures
+    "num_actions": env.action_space.n,          # number of allowed actions in game
+    "num_heads": 4,                             # number of attention heads in transformer layers
+    "num_layers": 2,                            # number of transformer encoding layers
+    "size_linear_layers": 128,                  # size of the fully connect linear layers in the transformer encoder setup
+    "conv_channels": [8, 0, 0, 32],             # convolutional channels for CNN picture extraction (only for lean cnn)
+    # "conv_channels": [8, 16, 32, 64],         # convolutional channels for CNN picture extraction
+    # "conv_channels": [384, 512, 640, 768],    # convolutional channels for CNN picture extraction
+    "dropout_linear": 0.31390469911775365,      # dropout rate in linear layer
+    "sigma_init": 0.05,                         # sigma value for the noisy network; higher sigma increases noise in network
+    "lean_cnn": True,                           # Inits a lean version of the CNN layer which only has the first and the last conv layer but less abstraction (so careful usage)
+    "save_images": False,                       # save images from CNN layer (for testing only, keep false for normal training)
+    "output_dir": output_dir                    # output directory for saving images (directory has to contain subfolder images)
 }
 
 # #####################################################

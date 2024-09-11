@@ -98,11 +98,11 @@ class Hyperparameters(object):
             "num_heads": trial.suggest_categorical("num_heads", [2, 4, 8, 16]),                             # number of attention heads in transformer layers
             "num_layers": trial.suggest_int("num_layers", 2, 32, step=2),                                   # number of transformer encoding layers
             "size_linear_layers": trial.suggest_categorical("size_linear_layers", [128, 256, 512]),         # size of the fully connect linear layers in the transformer encoder setup
-            "dropout_linear": trial.suggest_float("dropout_linear", 0.005, 0.5),                            # dropout rate in linear layer
-            "sigma_init": trial.suggest_float('sigma_init', 0.001, 0.05, log=True),                          # sigma value for the noisy network; higher sigma increases noise in network
-            "conv_channels": [8, 0, 0, 32],                                                               # convolutional channels for CNN picture extraction (if lean ccn True only first and last channel config is used)
+            "dropout_linear": trial.suggest_float("dropout_linear", 0.005, 0.05),                           # dropout rate in linear layer
+            "sigma_init": trial.suggest_float('sigma_init', 0.001, 0.05, log=True),                         # sigma value for the noisy network; higher sigma increases noise in network
+            "conv_channels": [8, 0, 0, 32],                                                                 # convolutional channels for CNN picture extraction (if lean ccn True only first and last channel config is used)
             "lean_cnn": True, # trial.suggest_categorical("lean_cnn", [True, False]),                       # Inits a lean version of the CNN layer which only has the first and the last conv channel but less abstraction (so careful usage)
-            "save_images": False,                                                                            # save images from CNN layer (for testing only, keep false for normal training)
+            "save_images": False,                                                                           # save images from CNN layer (for testing only, keep false for normal training)
             "output_dir": output_dir                                                                        # output directory for saving images (directory has to contain subfolder images)
         }
 
