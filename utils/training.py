@@ -124,7 +124,7 @@ class AgentOptimizerClassic:
                                        output=output_size,
                                        is_new=True)
 
-            while True:
+            while count_predicted_actions + count_random_actions <= self.hyper_params['max_steps_episode']:
                 # Select an action based on the current state
                 action, action_type, q_values_sum = self.agent.act(state, eps)
 
@@ -339,7 +339,7 @@ class AgentOptimizerClassicNoisy:
                                        output=output_size,
                                        is_new=True)
 
-            while True:
+            while count_actions <= self.hyper_params['max_steps_episode']:
                 # Select an action based on the current state
                 action, action_type, q_values_sum = self.agent.act(state)
 
@@ -634,7 +634,7 @@ class AgentOptimizerOptuna:
                                        output=output_size,
                                        is_new=True)
 
-            while True:
+            while count_predicted_actions + count_random_actions <= agent_hyper_params['max_steps_episode']:
                 # Select an action based on the current state
                 action, action_type, q_values_sum = agent.act(state, eps)
 
@@ -964,7 +964,7 @@ class AgentOptimizerOptunaNoisy:
                                   output=output_size,
                                   is_new=True)
 
-            while True:
+            while count_actions <= agent_hyper_params['max_steps_episode']:
                 # Select an action based on the current state
                 action, action_type, q_values_sum = agent.act(state)
 

@@ -365,6 +365,7 @@ class CNNExtractor(nn.Module):
             image = Image.fromarray(ndarr)
             image.save(filepath)
 
+
 class CNNExtractorLean(nn.Module):
     """
     A convolutional neural network (CNN) for extracting features from input images.
@@ -411,7 +412,7 @@ class CNNExtractorLean(nn.Module):
         # Define convolutional layers for feature extraction
         self.features = nn.Sequential(
             nn.Conv2d(input_shape[0], conv_channels[0], kernel_size=1, stride=1),
-            nn.Conv2d(conv_channels[0], conv_channels[3], kernel_size=1, stride=1),
+            nn.Conv2d(conv_channels[0], conv_channels[3], kernel_size=2, stride=1),
             nn.BatchNorm2d(conv_channels[3]),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
@@ -438,7 +439,7 @@ class CNNExtractorLean(nn.Module):
         # Extract features using convolutional layers
         for i, layer in enumerate(self.features):
             x = layer(x)
-            if self.save_images and isinstance(layer, (nn.Conv2d, nn.ReLU, nn.BatchNorm2d, nn.MaxPool2d)):
+            if self.save_images and isinstance(layer, (nn.MaxPool2d)): #nn.Conv2d, nn.ReLU, nn.BatchNorm2d,
                 self.save_output_image(x, i)
         return x
 
