@@ -209,26 +209,30 @@ class DDQAugmentedNoisyLSTMNN(nn.Module):
 
         # Define Noisy layers for advantage value computation
         self.advantage = nn.Sequential(
-            NoisyLinear(in_features=hidden_size,
+            NoisyLinear(in_features=self.num_channels * self.seq_length,
                         out_features=size_linear_layers,
                         sigma_init=sigma_init),
+            nn.LayerNorm(size_linear_layers),
             nn.ReLU(),
             nn.Dropout(dropout_linear),
             NoisyLinear(in_features=size_linear_layers,
                         out_features=self.num_actions,
-                        sigma_init=sigma_init)
+                        sigma_init=sigma_init),
+            nn.Tanh()
         )
 
         # Define Noisy layers for state value computation
         self.value = nn.Sequential(
-            NoisyLinear(in_features=hidden_size,
+            NoisyLinear(in_features=self.num_channels * self.seq_length,
                         out_features=size_linear_layers,
                         sigma_init=sigma_init),
+            nn.LayerNorm(size_linear_layers),
             nn.ReLU(),
             nn.Dropout(dropout_linear),
             NoisyLinear(in_features=size_linear_layers,
                         out_features=1,
-                        sigma_init=sigma_init)
+                        sigma_init=sigma_init),
+            nn.Tanh()
         )
 
     @property

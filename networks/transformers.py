@@ -232,11 +232,13 @@ class DDQAugmentedNoisyTransformerNN(nn.Module):
             NoisyLinear(in_features=self.num_channels * self.seq_length,
                         out_features=size_linear_layers,
                         sigma_init=sigma_init),
+            nn.LayerNorm(size_linear_layers),
             nn.ReLU(),
             nn.Dropout(dropout_linear),
             NoisyLinear(in_features=size_linear_layers,
                         out_features=self.num_actions,
-                        sigma_init=sigma_init)
+                        sigma_init=sigma_init),
+            nn.Tanh()
         )
 
         # Define Noisy layers for state value computation
@@ -244,11 +246,13 @@ class DDQAugmentedNoisyTransformerNN(nn.Module):
             NoisyLinear(in_features=self.num_channels * self.seq_length,
                         out_features=size_linear_layers,
                         sigma_init=sigma_init),
+            nn.LayerNorm(size_linear_layers),
             nn.ReLU(),
             nn.Dropout(dropout_linear),
             NoisyLinear(in_features=size_linear_layers,
                         out_features=1,
-                        sigma_init=sigma_init)
+                        sigma_init=sigma_init),
+            nn.Tanh()
         )
 
     @property
@@ -303,6 +307,7 @@ class DDQAugmentedNoisyTransformerNN(nn.Module):
         # combine advantage and value to get Q-values
         q_values = value + advantage - advantage.mean(dim=1, keepdim=True)
         logging.debug(f"Shape of Q-values: {q_values.shape}")
+        # print(f"Q-values: {q_values}")
 
         return q_values.squeeze()
 

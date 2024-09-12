@@ -68,7 +68,7 @@ class Hyperparameters(object):
     @staticmethod
     def get_params(trial):
         agent_hyper_params = {
-            "batch_size": trial.suggest_categorical("batch_size", [128, 256, 512]),                         # size of each batch pushed through the network
+            "batch_size": trial.suggest_categorical("batch_size", [32, 64, 128]),                         # size of each batch pushed through the network
             "action_size": env.action_space.n,                                                              # number of allowed actions in game
             "gamma": 0.99,                                                                                  # how much are future rewards valued
             "learning_rate": trial.suggest_float("learning_rate", 0.00001, 0.001, log=True),                # learning rate
@@ -79,7 +79,7 @@ class Hyperparameters(object):
                                                                                    50000, 100000]),         # size of the replay buffer
             "tau": trial.suggest_float("tau", 1e-5, 1e-1, log=True),                                        # defines how fast the target network gets adjusted to the policy netw.
             "final_tau": 0.0001,                                                                            # defines the lowest possible tau value
-            "learn_start": 15,                                                                              # number of episodes which have to be played before the training starts (10% of n_episodes)
+            "learn_start": 10,                                                                              # number of episodes which have to be played before the training starts (10% of n_episodes)
             "update_every": trial.suggest_int("update_every", 50, 200),                                     # number of steps after each the network gets updated once all other conditions were met
             "soft_update_target": trial.suggest_int("soft_update_target", 100, 500),                        # threshold of steps(actions) to start the soft update of the target network
             "n_episodes": 1000,                                                                             # number of episodes to play for the agent
@@ -93,13 +93,13 @@ class Hyperparameters(object):
         }
 
         network_hyper_params = {
-            "input_shape": (4, 72, 72),                                                                     # desired shape of state pictures
+            "input_shape": (4, 64, 64),                                                                     # desired shape of state pictures
             "num_actions": env.action_space.n,                                                              # number of allowed actions in game
-            "hidden_size": trial.suggest_categorical("hidden_size", [128, 256, 512]),                       # number of attention heads in transformer layers
-            "num_layers": trial.suggest_int("num_layers", 2, 32, step=2),                                   # number of transformer encoding layers
-            "size_linear_layers": trial.suggest_categorical("size_linear_layers", [128, 256, 512]),         # size of the fully connect linear layers in the transformer encoder setup
-            "dropout_linear": trial.suggest_float("dropout_linear", 0.005, 0.05),                           # dropout rate in linear layer
-            "sigma_init": trial.suggest_float('sigma_init', 0.001, 0.05, log=True),                         # sigma value for the noisy network; higher sigma increases noise in network
+            "hidden_size": trial.suggest_categorical("hidden_size", [32, 64, 128]),                       # number of attention heads in transformer layers
+            "num_layers": trial.suggest_categorical("num_layers", [2, 4, 8]),                                   # number of transformer encoding layers
+            "size_linear_layers": trial.suggest_categorical("size_linear_layers", [64, 96, 128]),         # size of the fully connect linear layers in the transformer encoder setup
+            "dropout_linear": trial.suggest_float("dropout_linear", 0.005, 0.01),                           # dropout rate in linear layer
+            "sigma_init": trial.suggest_float('sigma_init', 0.0001, 0.01, log=True),                         # sigma value for the noisy network; higher sigma increases noise in network
             "conv_channels": [8, 0, 0, 32],                                                                 # convolutional channels for CNN picture extraction
             "lean_cnn": True, # trial.suggest_categorical("lean_cnn", [True, False]),                       # Inits a lean version of the CNN layer which only has the first and the last conv channel but less abstraction (so careful usage)
             "save_images": False,                                                                           # save images from CNN layer (for testing only, keep false for normal training)
