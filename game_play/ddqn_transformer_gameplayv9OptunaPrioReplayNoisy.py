@@ -11,7 +11,7 @@ import gym
 # import custom
 from agents import DeepQNetworkAgentPrioritized
 from networks import DDQAugmentedNoisyTransformerNN
-from utils import FrameProcessor, LRSchedulerSelector, OptimizerSelector, LossFunctionSelector
+from utils import FrameProcessor, LRSchedulerSelector, OptimizerSelector, LossFunctionSelector, FrameProcessorDynamic
 
 # #####################################################
 # ################ output directory ###################
@@ -51,8 +51,8 @@ env = gym.make("ALE/SpaceInvaders-v5", render_mode="human")
 # #####################################################
 # ################ init hyperparameter ################
 # #####################################################
-agent_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote_20240907/metrics/trial_99_DDQAugmentedNoisyTransformerNN_agent_hyper_params.yaml', 'r')
-network_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote_20240907/metrics/trial_99_DDQAugmentedNoisyTransformerNN_network_hyper_params.yaml', 'r')
+agent_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote/metrics/trial_14_DDQAugmentedNoisyTransformerNN_agent_hyper_params.yaml', 'r')
+network_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote/metrics/trial_14_DDQAugmentedNoisyTransformerNN_network_hyper_params.yaml', 'r')
 agent_hyper_params = yaml.load(agent_params_file, Loader=yaml.FullLoader)
 network_hyper_params = yaml.load(network_params_file, Loader=yaml.FullLoader)
 
@@ -88,7 +88,7 @@ loss_function = lfselector(agent_hyper_params=agent_hyper_params)
 # #####################################################
 
 # initialize frame processor for preprocess the game images and for stacking the frames
-fp = FrameProcessor()
+fp = FrameProcessorDynamic(num_stacked_frames=network_hyper_params['input_shape'][0])
 
 # init agent
 trained_agent = DeepQNetworkAgentPrioritized(policy_net=policy_net,
@@ -105,7 +105,7 @@ trained_agent = DeepQNetworkAgentPrioritized(policy_net=policy_net,
                                              loss_function=loss_function)
 
 # load pre-trained model into agent
-trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output_remote_20240907/models/20240906_trial_99_DDQAugmentedNoisyTransformerNN.pth', map_location=device)
+trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output_remote/models/20240913_trial_14_DDQAugmentedNoisyTransformerNN.pth', map_location=device)
 
 output_size = network_hyper_params['input_shape'][1]
 
@@ -118,7 +118,7 @@ state = fp.preprocess(stacked_frames=None,
 
 while True:
     env.render()
-    action, _, _ = trained_agent.act(state, eval_mode=False)
+    action, _, _ = trained_agent.act(state, eval_mode=True)
     print(f'action: {action}')
     next_state, reward, terminated, truncated, info = env.step(action)
     score += reward

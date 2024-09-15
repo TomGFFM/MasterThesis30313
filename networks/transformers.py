@@ -288,7 +288,7 @@ class DDQAugmentedNoisyTransformerNN(nn.Module):
             x = encoder(x)
             logging.debug(f"Shape after transformer encoder: {x.shape}")
 
-        # remove the sequence dimension post transformer
+        # remove the sequence dimension post transformer to flatten input for linear layer
         x = x.view(batch_size, -1)
         logging.debug(f"Shape after view to remove sequence dimension: {x.shape}")
 

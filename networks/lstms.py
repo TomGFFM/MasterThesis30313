@@ -209,7 +209,7 @@ class DDQAugmentedNoisyLSTMNN(nn.Module):
 
         # Define Noisy layers for advantage value computation
         self.advantage = nn.Sequential(
-            NoisyLinear(in_features=self.num_channels * self.seq_length,
+            NoisyLinear(in_features=hidden_size,
                         out_features=size_linear_layers,
                         sigma_init=sigma_init),
             nn.LayerNorm(size_linear_layers),
@@ -223,7 +223,7 @@ class DDQAugmentedNoisyLSTMNN(nn.Module):
 
         # Define Noisy layers for state value computation
         self.value = nn.Sequential(
-            NoisyLinear(in_features=self.num_channels * self.seq_length,
+            NoisyLinear(in_features=hidden_size,
                         out_features=size_linear_layers,
                         sigma_init=sigma_init),
             nn.LayerNorm(size_linear_layers),

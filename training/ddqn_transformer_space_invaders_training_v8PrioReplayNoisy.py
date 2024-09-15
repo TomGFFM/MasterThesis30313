@@ -85,9 +85,9 @@ agent_hyper_params = {
 network_hyper_params = {
     "input_shape": (4, 64, 64),                 # desired shape of state pictures
     "num_actions": env.action_space.n,          # number of allowed actions in game
-    "num_heads": 8,                             # number of attention heads in transformer layers
-    "num_layers": 8,                            # number of transformer encoding layers
-    "size_linear_layers": 128,                  # size of the fully connect linear layers in the transformer encoder setup
+    "num_heads": 16,                            # number of attention heads in transformer layers
+    "num_layers": 16,                           # number of transformer encoding layers
+    "size_linear_layers": 192,                  # size of the fully connect linear layers in the transformer encoder setup
     "conv_channels": [8, 0, 0, 32],             # convolutional channels for CNN picture extraction (only for lean cnn)
     # "conv_channels": [8, 16, 32, 64],         # convolutional channels for CNN picture extraction
     # "conv_channels": [384, 512, 640, 768],    # convolutional channels for CNN picture extraction
