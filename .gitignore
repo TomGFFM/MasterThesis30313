@@ -1,5 +1,7 @@
 # Ignore everything starting with 'output' (any directory or file)
-output*/
+output_*/
+output/**
+!output/**/.gitkeep
 
 # Ignore server_setup directory and everything under it
 server_setup/
