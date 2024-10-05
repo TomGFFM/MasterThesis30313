@@ -9,7 +9,7 @@ import torch
 import gym
 
 # import custom
-from agents import DeepQNetworkAgentPrioritized
+from agents import DeepQNetworkAgentPrioritized, DeepQNetworkAgentPrioritizedNoisy
 from networks import DDQAugmentedNoisyTransformerNN
 from utils import FrameProcessor, LRSchedulerSelector, OptimizerSelector, LossFunctionSelector, FrameProcessorDynamic
 
@@ -51,25 +51,26 @@ env = gym.make("ALE/SpaceInvaders-v5", render_mode="human")
 # #####################################################
 # ################ init hyperparameter ################
 # #####################################################
-agent_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote/metrics/trial_14_DDQAugmentedNoisyTransformerNN_agent_hyper_params.yaml', 'r')
-network_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote/metrics/trial_14_DDQAugmentedNoisyTransformerNN_network_hyper_params.yaml', 'r')
+agent_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote/metrics/trial_47_DDQAugmentedNoisyTransformerNN_agent_hyper_params.yaml', 'r')
+network_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote/metrics/trial_47_DDQAugmentedNoisyTransformerNN_network_hyper_params.yaml', 'r')
 agent_hyper_params = yaml.load(agent_params_file, Loader=yaml.FullLoader)
 network_hyper_params = yaml.load(network_params_file, Loader=yaml.FullLoader)
 
 # #####################################################
 # ##### init networks, optimizers and co. #############
 # #####################################################
+# uncomment if cnn extractions from gameplay should be extracted.
+network_hyper_params['save_images'] = True
+
 # inital network and optimizer setup
 model_name = 'DDQAugmentedTransformerNNv9OptunaPrioReplayNoisy'
 
 # Q-Network
 policy_net = DDQAugmentedNoisyTransformerNN(**network_hyper_params).to(device)
-target_net = DDQAugmentedNoisyTransformerNN(**network_hyper_params).to(device)
 
 # Set model name parameter in networks for logging purposes
 if model_name:
     policy_net.model_name = model_name
-    target_net.model_name = model_name
 
 # Init optimizer
 oselector = OptimizerSelector()
@@ -91,21 +92,20 @@ loss_function = lfselector(agent_hyper_params=agent_hyper_params)
 fp = FrameProcessorDynamic(num_stacked_frames=network_hyper_params['input_shape'][0])
 
 # init agent
-trained_agent = DeepQNetworkAgentPrioritized(policy_net=policy_net,
-                                             target_net=target_net,
-                                             action_size=env.action_space.n,
-                                             device=device,
-                                             agent_hyper_params=agent_hyper_params,
-                                             network_hyper_params=network_hyper_params,
-                                             optimizer=optimizer,
-                                             lr_scheduler=lr_scheduler,
-                                             reward_shaping=False,
-                                             reward_factor=agent_hyper_params['reward_factor'],
-                                             punish_factor=agent_hyper_params['punish_factor'],
-                                             loss_function=loss_function)
+trained_agent = DeepQNetworkAgentPrioritizedNoisy(policy_net=policy_net,
+                                                  target_net=None,
+                                                  action_size=env.action_space.n,
+                                                  device=device,
+                                                  agent_hyper_params=agent_hyper_params,
+                                                  network_hyper_params=network_hyper_params,
+                                                  optimizer=optimizer,
+                                                  lr_scheduler=lr_scheduler,
+                                                  reward_factor=agent_hyper_params['reward_factor'],
+                                                  punish_factor=agent_hyper_params['punish_factor'],
+                                                  loss_function=loss_function)
 
 # load pre-trained model into agent
-trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output_remote/models/20240913_trial_14_DDQAugmentedNoisyTransformerNN.pth', map_location=device)
+trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output_remote/models/20241001_trial_47_DDQAugmentedNoisyTransformerNN_final_model.pth', map_location=device)
 
 output_size = network_hyper_params['input_shape'][1]
 

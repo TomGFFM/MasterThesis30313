@@ -59,17 +59,18 @@ network_hyper_params = yaml.load(network_params_file, Loader=yaml.FullLoader)
 # #####################################################
 # ##### init networks, optimizers and co. #############
 # #####################################################
+# uncomment if cnn extractions from gameplay should be extracted.
+network_hyper_params['save_images'] = True
+
 # inital network and optimizer setup
 model_name = 'DDQAugmentedTransformerNNv9OptunaPrioReplayNoisy'
 
 # Q-Network
 policy_net = DDQAugmentedNoisyLSTMNN(**network_hyper_params).to(device)
-target_net = DDQAugmentedNoisyLSTMNN(**network_hyper_params).to(device)
 
 # Set model name parameter in networks for logging purposes
 if model_name:
     policy_net.model_name = model_name
-    target_net.model_name = model_name
 
 # Init optimizer
 oselector = OptimizerSelector()
@@ -92,7 +93,7 @@ fp = FrameProcessor()
 
 # init agent
 trained_agent = DeepQNetworkAgentPrioritized(policy_net=policy_net,
-                                             target_net=target_net,
+                                             target_net=None,
                                              action_size=env.action_space.n,
                                              device=device,
                                              agent_hyper_params=agent_hyper_params,

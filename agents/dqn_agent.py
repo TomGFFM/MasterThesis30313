@@ -686,7 +686,7 @@ class DeepQNetworkAgentPrioritizedNoisy:
                  optimizer: torch.optim.Optimizer,
                  lr_scheduler: torch.optim.lr_scheduler = None,
                  loss_function: torch.nn.functional = None,
-                 reward_shaping: bool = False,
+                 reward_shaping: bool = True,
                  reward_factor: float = 1.4,
                  punish_factor: float = 1.8):
 
