@@ -76,19 +76,19 @@ agent_hyper_params = {
     # "tau": 0.0007852909759645722,                    # defines how fast the target network gets adjusted to the policy netw.
     "tau": 0.0007852909759645722,                    # defines how fast the target network gets adjusted to the policy netw.
     "final_tau": 0.0001,                        # defines the lowest possible tau value
-    "learn_start": 2,                           # number of episodes which have to be played before the training starts
+    "learn_start": 1,                           # number of episodes which have to be played before the training starts
     "update_every": 145,                        # number of steps after each the network gets updated once all other conditions were met
     "soft_update_target": 159,                  # threshold of steps(actions) to start the soft update of the target network
     "n_episodes": 100                           # number of episodes to play for the agent
 }
 
 network_hyper_params = {
-    "input_shape": (4, 50, 50),                 # desired shape of state pictures
+    "input_shape": (4, 70, 70),                 # desired shape of state pictures
     "num_actions": env.action_space.n,          # number of allowed actions in game
-    "num_heads": 4,                            # number of attention heads in transformer layers
-    "num_layers": 8,                           # number of transformer encoding layers
+    "num_heads": 1,                            # number of attention heads in transformer layers
+    "num_layers": 2,                           # number of transformer encoding layers
     "size_linear_layers": 192,                  # size of the fully connect linear layers in the transformer encoder setup
-    "conv_channels": [0, 0, 0, 4],             # convolutional channels for CNN picture extraction (only for lean cnn)
+    "conv_channels": [0, 0, 0, 8],             # convolutional channels for CNN picture extraction (only for lean cnn)
     # "conv_channels": [8, 16, 32, 64],         # convolutional channels for CNN picture extraction
     # "conv_channels": [384, 512, 640, 768],    # convolutional channels for CNN picture extraction
     "dropout_linear": 0.01,                     # dropout rate in linear layer
@@ -114,12 +114,14 @@ if model_name:
     target_net.model_name = model_name
 
 # Init optimizer
-optimizer = optim.RMSprop(policy_net.parameters(), lr=agent_hyper_params['learning_rate'])
+optimizer = optim.Adam(policy_net.parameters(), lr=agent_hyper_params['learning_rate'])
+# optimizer = optim.RMSprop(policy_net.parameters(), lr=agent_hyper_params['learning_rate'])
+# optimizer = optim.SGD(policy_net.parameters(), lr=agent_hyper_params['learning_rate'], momentum=0.9, nesterov=True)
 
 # Init lr scheduler (optional)
-lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=agent_hyper_params['n_episodes'], eta_min=0.000001)
+# lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=agent_hyper_params['n_episodes'], eta_min=0.000001)
 # lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.25, patience=100)
-# lr_scheduler = None
+lr_scheduler = None
 
 # #####################################################
 # ################ init agent #########################

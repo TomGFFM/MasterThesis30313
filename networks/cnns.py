@@ -411,11 +411,12 @@ class CNNExtractorLean(nn.Module):
 
         # Define convolutional layers for feature extraction
         self.features = nn.Sequential(
-            nn.Conv2d(input_shape[0], conv_channels[3], kernel_size=1, stride=1),
+            nn.Conv2d(input_shape[0], conv_channels[3], kernel_size=1, stride=2),
             nn.BatchNorm2d(conv_channels[3]),
-            nn.ReLU(),
+            nn.SELU(),
             nn.BatchNorm2d(conv_channels[3]),
             nn.MaxPool2d(kernel_size=1, stride=1),
+            nn.SELU(),
         )
 
     @property
@@ -440,8 +441,12 @@ class CNNExtractorLean(nn.Module):
         # Extract features using convolutional layers
         for i, layer in enumerate(self.features):
             x = layer(x)
-            if self.save_images and isinstance(layer, (nn.MaxPool2d)): #nn.Conv2d, nn.ReLU, nn.BatchNorm2d,
-                self.save_output_image(x, i)
+            # if self.save_images and isinstance(layer, (nn.SELU)): #nn.Conv2d, nn.ReLU, nn.BatchNorm2d,nn.MaxPool2d
+            #     self.save_output_image(x, i)
+
+        # save the output of the last layer
+        if self.save_images:
+            self.save_output_image(x, len(self.features) - 1)
         return x
 
     def save_output_image(self, tensor: torch.Tensor, layer_index: int, save_every_x_images: int = 3) -> None:

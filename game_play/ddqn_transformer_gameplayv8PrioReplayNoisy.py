@@ -50,7 +50,7 @@ logging.info(f"Device was set to: {device}")
 output_dir = '../output'
 
 # initialize the gym environment
-env = gym.make("ALE/SpaceInvaders-v5", render_mode="human")
+env = gym.make("ALE/SpaceInvaders-v5", render_mode="human", frameskip=1)
 
 # #####################################################
 # ################ init hyperparameter ################

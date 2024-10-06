@@ -95,8 +95,8 @@ class Hyperparameters(object):
         network_hyper_params = {
             "input_shape": (4, 42, 42),                                                                     # desired shape of state pictures
             "num_actions": env.action_space.n,                                                              # number of allowed actions in game
-            "hidden_size": trial.suggest_categorical("hidden_size", [32, 64, 128]),                         # number of attention heads in transformer layers
-            "num_layers": trial.suggest_categorical("num_layers", [1, 2, 4, 8]),                            # number of transformer encoding layers
+            "hidden_size": trial.suggest_categorical("hidden_size", [32, 64, 128]),                         # size of hidden layers
+            "num_layers": trial.suggest_categorical("num_layers", [1, 2, 3]),                               # number of LSTM layers
             "size_linear_layers": trial.suggest_categorical("size_linear_layers", [64, 96, 128, 256]),      # size of the fully connect linear layers in the transformer encoder setup
             "dropout_linear": trial.suggest_float("dropout_linear", 0.005, 0.01),                           # dropout rate in linear layer
             "sigma_init": trial.suggest_float('sigma_init', 0.0001, 0.01, log=True),                        # sigma value for the noisy network; higher sigma increases noise in network

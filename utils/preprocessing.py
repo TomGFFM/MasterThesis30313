@@ -72,6 +72,7 @@ class FrameProcessor:
 
         # Crop the screen (Up:Down, Left:Right)
         screen = screen[exclude[0]:exclude[2], exclude[3]:exclude[1]]
+        # screen = env_array[exclude[0]:exclude[2], exclude[3]:exclude[1]]
 
         # Convert to float and normalize the pixel values
         screen = np.ascontiguousarray(screen, dtype=np.float32) / 255

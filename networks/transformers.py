@@ -307,7 +307,6 @@ class DDQAugmentedNoisyTransformerNN(nn.Module):
         # combine advantage and value to get Q-values
         q_values = value + advantage - advantage.mean(dim=1, keepdim=True)
         logging.debug(f"Shape of Q-values: {q_values.shape}")
-        # print(f"Q-values: {q_values}")
 
         return q_values.squeeze()
 

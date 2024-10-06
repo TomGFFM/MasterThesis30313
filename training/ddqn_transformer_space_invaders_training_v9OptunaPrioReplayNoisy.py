@@ -93,14 +93,14 @@ class Hyperparameters(object):
         }
 
         network_hyper_params = {
-            "input_shape": (4, 42, 42),                                                                     # desired shape of state pictures
+            "input_shape": (4, 70, 70),                                                                     # desired shape of state pictures
             "num_actions": env.action_space.n,                                                              # number of allowed actions in game
             "num_heads": trial.suggest_categorical("num_heads", [1, 2, 4]),                                 # number of attention heads in transformer layers
-            "num_layers": trial.suggest_categorical("num_layers", [1, 2, 4, 8]),                           # number of transformer encoding layers
+            "num_layers": trial.suggest_categorical("num_layers", [1, 2, 3]),                               # number of transformer encoding layers
             "size_linear_layers": trial.suggest_categorical("size_linear_layers", [64, 96, 128, 256]),      # size of the fully connect linear layers in the transformer encoder setup
             "dropout_linear": trial.suggest_float("dropout_linear", 0.005, 0.01),                           # dropout rate in linear layer
             "sigma_init": trial.suggest_float('sigma_init', 0.0001, 0.01, log=True),                        # sigma value for the noisy network; higher sigma increases noise in network
-            "conv_channels": [0, 0, 0, 4],                                                                 # convolutional channels for CNN picture extraction (if lean ccn True only first and last channel config is used)
+            "conv_channels": [0, 0, 0, 4],                                                                  # convolutional channels for CNN picture extraction (if lean ccn True only first and last channel config is used)
             "lean_cnn": True, # trial.suggest_categorical("lean_cnn", [True, False]),                       # Inits a lean version of the CNN layer which only has the first and the last conv channel but less abstraction (so careful usage)
             "save_images": False,                                                                           # save images from CNN layer (for testing only, keep false for normal training)
             "output_dir": output_dir                                                                        # output directory for saving images (directory has to contain subfolder images)
