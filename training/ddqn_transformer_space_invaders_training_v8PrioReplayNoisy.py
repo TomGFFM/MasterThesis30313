@@ -88,7 +88,7 @@ network_hyper_params = {
     "num_heads": 1,                            # number of attention heads in transformer layers
     "num_layers": 2,                           # number of transformer encoding layers
     "size_linear_layers": 192,                  # size of the fully connect linear layers in the transformer encoder setup
-    "conv_channels": [0, 0, 0, 8],             # convolutional channels for CNN picture extraction (only for lean cnn)
+    "conv_channels": [0, 0, 0, 4],             # convolutional channels for CNN picture extraction (only for lean cnn)
     # "conv_channels": [8, 16, 32, 64],         # convolutional channels for CNN picture extraction
     # "conv_channels": [384, 512, 640, 768],    # convolutional channels for CNN picture extraction
     "dropout_linear": 0.01,                     # dropout rate in linear layer
