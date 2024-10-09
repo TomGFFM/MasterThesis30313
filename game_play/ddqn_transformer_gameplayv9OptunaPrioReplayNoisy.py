@@ -47,12 +47,17 @@ logging.info(f"Device was set to: {device}")
 # #####################################################
 # initialize the gym environment
 env = gym.make("ALE/SpaceInvaders-v5", render_mode="human", frameskip=1)
+# env = gym.make("ALE/Carnival-v5", render_mode="human", frameskip=1)
+# env = gym.make("ALE/DemonAttack-v5", render_mode="human", frameskip=1)
+# env = gym.make("ALE/Galaxian-v5", render_mode="human", frameskip=1)
+
+
 
 # #####################################################
 # ################ init hyperparameter ################
 # #####################################################
-agent_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote_20240917/metrics/trial_19_DDQAugmentedNoisyTransformerNN_agent_hyper_params.yaml', 'r')
-network_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote_20240917/metrics/trial_19_DDQAugmentedNoisyTransformerNN_network_hyper_params.yaml', 'r')
+agent_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote/metrics/trial_3_DDQAugmentedNoisyTransformerNN_agent_hyper_params.yaml', 'r')
+network_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote/metrics/trial_3_DDQAugmentedNoisyTransformerNN_network_hyper_params.yaml', 'r')
 agent_hyper_params = yaml.load(agent_params_file, Loader=yaml.FullLoader)
 network_hyper_params = yaml.load(network_params_file, Loader=yaml.FullLoader)
 
@@ -105,7 +110,7 @@ trained_agent = DeepQNetworkAgentPrioritizedNoisy(policy_net=policy_net,
                                                   loss_function=loss_function)
 
 # load pre-trained model into agent
-trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output_remote_20240917/models/20240914_trial_19_DDQAugmentedNoisyTransformerNN.pth', map_location=device)
+trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output_remote/models/20241007_trial_3_DDQAugmentedNoisyTransformerNN_episode_563_score_0.36.pth', map_location=device)
 
 output_size = network_hyper_params['input_shape'][1]
 

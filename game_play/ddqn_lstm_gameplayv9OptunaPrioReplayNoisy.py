@@ -51,8 +51,8 @@ env = gym.make("ALE/SpaceInvaders-v5", render_mode="human", frameskip=1)
 # #####################################################
 # ################ init hyperparameter ################
 # #####################################################
-agent_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote/metrics/trial_7_DDQAugmentedNoisyLSTMNN_agent_hyper_params.yaml', 'r')
-network_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote/metrics/trial_7_DDQAugmentedNoisyLSTMNN_network_hyper_params.yaml', 'r')
+agent_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote/metrics/trial_14_DDQAugmentedNoisyLSTMNN_agent_hyper_params.yaml', 'r')
+network_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote/metrics/trial_14_DDQAugmentedNoisyLSTMNN_network_hyper_params.yaml', 'r')
 agent_hyper_params = yaml.load(agent_params_file, Loader=yaml.FullLoader)
 network_hyper_params = yaml.load(network_params_file, Loader=yaml.FullLoader)
 
@@ -60,7 +60,7 @@ network_hyper_params = yaml.load(network_params_file, Loader=yaml.FullLoader)
 # ##### init networks, optimizers and co. #############
 # #####################################################
 # uncomment if cnn extractions from gameplay should be extracted.
-network_hyper_params['save_images'] = True
+network_hyper_params['save_images'] = False
 
 # inital network and optimizer setup
 model_name = 'DDQAugmentedTransformerNNv9OptunaPrioReplayNoisy'
@@ -106,7 +106,7 @@ trained_agent = DeepQNetworkAgentPrioritized(policy_net=policy_net,
                                              loss_function=loss_function)
 
 # load pre-trained model into agent
-trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output_remote/models/20240916_trial_7_DDQAugmentedNoisyLSTMNN.pth', map_location=device)
+trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output_remote/models/20241009_trial_14_DDQAugmentedNoisyLSTMNN_final_model.pth', map_location=device)
 
 output_size = network_hyper_params['input_shape'][1]
 
@@ -119,7 +119,7 @@ state = fp.preprocess(stacked_frames=None,
 
 while True:
     env.render()
-    action, _, _ = trained_agent.act(state, eval_mode=False)
+    action, _, _ = trained_agent.act(state, eval_mode=True)
     print(f'action: {action}')
     next_state, reward, terminated, truncated, info = env.step(action)
     score += reward
