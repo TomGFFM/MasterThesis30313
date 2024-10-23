@@ -366,7 +366,7 @@ class CNNExtractor(nn.Module):
             image.save(filepath)
 
 
-class CNNExtractorLean(nn.Module):
+class CNNExtractorLowAbstraction(nn.Module):
     """
     A convolutional neural network (CNN) for extracting features from input images.
 
@@ -402,7 +402,7 @@ class CNNExtractorLean(nn.Module):
             output_dir (str): The directory to save the output images.
                               Default: 'output'
         """
-        super(CNNExtractorLean, self).__init__()
+        super(CNNExtractorLowAbstraction, self).__init__()
         self.input_shape = input_shape
         self.conv_channels = conv_channels
         self.save_images = save_images
@@ -523,7 +523,7 @@ class CNNExtractorLean(nn.Module):
 
 
 # ###### Version 11.09.2024 works with output_remote_20240917
-# class CNNExtractorLean(nn.Module):
+# class CNNExtractorLowAbstraction(nn.Module):
 #     """
 #     A convolutional neural network (CNN) for extracting features from input images.
 #
@@ -559,7 +559,7 @@ class CNNExtractorLean(nn.Module):
 #             output_dir (str): The directory to save the output images.
 #                               Default: 'output'
 #         """
-#         super(CNNExtractorLean, self).__init__()
+#         super(CNNExtractorLowAbstraction, self).__init__()
 #         self.input_shape = input_shape
 #         self.conv_channels = conv_channels
 #         self.save_images = save_images

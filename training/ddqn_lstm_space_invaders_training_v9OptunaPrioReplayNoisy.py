@@ -77,8 +77,8 @@ class Hyperparameters(object):
             "max_steps_episode": 5000,                                                                      # maximum actions to be expected within an episode
             "replay_buffer_size": trial.suggest_categorical("replay_buffer_size", [1000, 5000, 10000,
                                                                                    50000, 100000]),         # size of the replay buffer
-            "tau": trial.suggest_float("tau", 1e-5, 1e-1, log=True),                                        # defines how fast the target network gets adjusted to the policy netw.
-            "final_tau": 0.0001,                                                                            # defines the lowest possible tau value
+            "tau": trial.suggest_float("tau", 0.00001, 0.1, log=True),                                        # defines how fast the target network gets adjusted to the policy netw.
+            "final_tau": 0.00001,                                                                            # defines the lowest possible tau value
             "learn_start": 20,                                                                              # number of episodes which have to be played before the training starts (10% of n_episodes)
             "update_every": trial.suggest_int("update_every", 50, 200),                                     # number of steps after each the network gets updated once all other conditions were met
             "soft_update_target": trial.suggest_int("soft_update_target", 100, 500),                        # threshold of steps(actions) to start the soft update of the target network
@@ -93,10 +93,10 @@ class Hyperparameters(object):
         }
 
         network_hyper_params = {
-            "input_shape": (4, 42, 42),                                                                     # desired shape of state pictures
+            "input_shape": (4, 70, 70),                                                                     # desired shape of state pictures
             "num_actions": env.action_space.n,                                                              # number of allowed actions in game
             "hidden_size": trial.suggest_categorical("hidden_size", [32, 64, 128, 256]),                    # size of hidden layers
-            "num_layers": trial.suggest_categorical("num_layers", [1, 2, 3, 5, 10]),                        # number of LSTM layers
+            "num_layers": trial.suggest_categorical("num_layers", [1, 2, 3]),                               # number of LSTM layers
             "size_linear_layers": trial.suggest_categorical("size_linear_layers", [64, 96, 128, 256]),      # size of the fully connect linear layers in the transformer encoder setup
             "dropout_linear": trial.suggest_float("dropout_linear", 0.005, 0.01),                           # dropout rate in linear layer
             "sigma_init": trial.suggest_float('sigma_init', 0.0001, 0.01, log=True),                        # sigma value for the noisy network; higher sigma increases noise in network

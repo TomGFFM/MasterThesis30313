@@ -3,7 +3,7 @@ import numpy as np
 
 import torch
 import torch.nn as nn
-from networks import CNNExtractor, CNNExtractorLean, NoisyLinear
+from networks import CNNExtractor, CNNExtractorLowAbstraction, NoisyLinear
 
 
 class DDQAugmentedTransformerNN(nn.Module):
@@ -52,7 +52,7 @@ class DDQAugmentedTransformerNN(nn.Module):
 
         # cnn layer for feature extraction
         if lean_cnn:
-            self.cnnex = CNNExtractorLean(input_shape, conv_channels, save_images, output_dir)
+            self.cnnex = CNNExtractorLowAbstraction(input_shape, conv_channels, save_images, output_dir)
         else:
             self.cnnex = CNNExtractor(input_shape, conv_channels, save_images, output_dir)
 
@@ -211,7 +211,7 @@ class DDQAugmentedNoisyTransformerNN(nn.Module):
 
         # cnn layer for feature extraction
         if lean_cnn:
-            self.cnnex = CNNExtractorLean(input_shape, conv_channels, save_images, output_dir)
+            self.cnnex = CNNExtractorLowAbstraction(input_shape, conv_channels, save_images, output_dir)
         else:
             self.cnnex = CNNExtractor(input_shape, conv_channels, save_images, output_dir)
 

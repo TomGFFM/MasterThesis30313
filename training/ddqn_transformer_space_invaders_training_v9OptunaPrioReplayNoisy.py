@@ -77,9 +77,9 @@ class Hyperparameters(object):
             "max_steps_episode": 5000,                                                                      # maximum actions to be expected within an episode
             "replay_buffer_size": trial.suggest_categorical("replay_buffer_size", [1000, 5000, 10000,
                                                                                    50000, 100000]),         # size of the replay buffer
-            "tau": trial.suggest_float("tau", 1e-5, 1e-1, log=True),                                        # defines how fast the target network gets adjusted to the policy netw.
-            "final_tau": 0.0001,                                                                            # defines the lowest possible tau value
-            "learn_start": 20,                                                                              # number of episodes which have to be played before the training starts (10% of n_episodes)
+            "tau": trial.suggest_float("tau", 0.00001, 0.1, log=True),                                        # defines how fast the target network gets adjusted to the policy netw.
+            "final_tau": 0.00001,                                                                            # defines the lowest possible tau value
+            "learn_start": 20,                                                                              # number of episodes which have to be played before the training starts
             "update_every": trial.suggest_int("update_every", 50, 200),                                     # number of steps after each the network gets updated once all other conditions were met
             "soft_update_target": trial.suggest_int("soft_update_target", 100, 500),                        # threshold of steps(actions) to start the soft update of the target network
             "n_episodes": 1200,                                                                             # number of episodes to play for the agent
