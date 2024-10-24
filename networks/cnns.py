@@ -415,7 +415,6 @@ class CNNExtractorLowAbstraction(nn.Module):
             nn.BatchNorm2d(conv_channels[3]),
             nn.SELU(),
             nn.BatchNorm2d(conv_channels[3]),
-            nn.MaxPool2d(kernel_size=1, stride=1),
             nn.SELU(),
         )
 

@@ -107,6 +107,10 @@ class DDQAugmentedLSTMNN(nn.Module):
         # get the last output of the LSTM
         x = x[:, -1, :]
 
+        # apply layer normalization
+        x = self.layer_norm(x)
+        logging.debug(f"Shape after layer normalization: {x.shape}")
+
         # compute advantage values
         advantage = self.advantage(x)
 
