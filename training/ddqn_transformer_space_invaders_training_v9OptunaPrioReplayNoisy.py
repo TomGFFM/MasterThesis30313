@@ -119,5 +119,5 @@ ao = AgentOptimizerOptunaNoisy(agent=DeepQNetworkAgentPrioritizedNoisy,
                                device=device,
                                output_dir=output_dir)
 
-ao.train(n_trials=30, n_jobs=1, warmup_steps=50)
+ao.train(n_trials=25, n_jobs=1, warmup_steps=100)
 
