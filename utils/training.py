@@ -1061,9 +1061,9 @@ class AgentOptimizerOptunaNoisy:
 
             # save all models with score > 0.25
             if mvg_avg_score >= 0.28:
-                model_path = self.get_file_path(self.output_dir + '/models', f'{file_ref}_episode_{episode}_score_{best_score:.4f}.pth')
+                model_path = self.get_file_path(self.output_dir + '/models', f'{file_ref}_episode_{episode}_score_{mvg_avg_score:.4f}.pth')
                 agent.save(model_path)  # Save the best model
-                logging.info(f'New best model saved with score: {best_score:.4f}')
+                logging.info(f'Intermediate model saved with score: {mvg_avg_score:.4f}')
 
             # Save non q-metrics to Parquet file
             df_metrics = pd.DataFrame(metrics_data)

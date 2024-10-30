@@ -56,8 +56,8 @@ env = gym.make("ALE/SpaceInvaders-v5", render_mode="human", frameskip=1)
 # #####################################################
 # ################ init hyperparameter ################
 # #####################################################
-agent_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote/metrics/trial_12_DDQAugmentedNoisyTransformerNN_agent_hyper_params.yaml', 'r')
-network_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote/metrics/trial_12_DDQAugmentedNoisyTransformerNN_network_hyper_params.yaml', 'r')
+agent_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote_20241009/metrics/trial_21_DDQAugmentedNoisyTransformerNN_agent_hyper_params.yaml', 'r')
+network_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote_20241009/metrics/trial_21_DDQAugmentedNoisyTransformerNN_network_hyper_params.yaml', 'r')
 agent_hyper_params = yaml.load(agent_params_file, Loader=yaml.FullLoader)
 network_hyper_params = yaml.load(network_params_file, Loader=yaml.FullLoader)
 
@@ -65,7 +65,7 @@ network_hyper_params = yaml.load(network_params_file, Loader=yaml.FullLoader)
 # ##### init networks, optimizers and co. #############
 # #####################################################
 # uncomment if cnn extractions from gameplay should be extracted.
-network_hyper_params['save_images'] = False
+network_hyper_params['save_images'] = True
 
 # inital network and optimizer setup
 model_name = 'DDQAugmentedTransformerNNv9OptunaPrioReplayNoisy'
@@ -110,7 +110,7 @@ trained_agent = DeepQNetworkAgentPrioritizedNoisy(policy_net=policy_net,
                                                   loss_function=loss_function)
 
 # load pre-trained model into agent
-trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output_remote/models/20241027_trial_12_DDQAugmentedNoisyTransformerNN_episode_1000_score_0.3145.pth', map_location=device)
+trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output_remote_20241009/models/20241007_trial_21_DDQAugmentedNoisyTransformerNN_episode_658_score_0.33.pth', map_location=device)
 
 output_size = network_hyper_params['input_shape'][1]
 
