@@ -1,1 +1,1 @@
-from .dqn_agent import DeepQNetworkAgentClassic, DeepQNetworkAgentPrioritized, DeepQNetworkAgentPrioritizedNoisy
+from .dqn_agent import DeepQNetworkAgentPrioritizedNoisy

@@ -9,9 +9,9 @@ import torch
 import gym
 
 # import custom
-from agents import DeepQNetworkAgentPrioritized, DeepQNetworkAgentPrioritizedNoisy
+from agents import DeepQNetworkAgentPrioritizedNoisy
 from networks import DDQAugmentedNoisyTransformerNN
-from utils import FrameProcessor, LRSchedulerSelector, OptimizerSelector, LossFunctionSelector, FrameProcessorDynamic
+from utils import LRSchedulerSelector, OptimizerSelector, LossFunctionSelector, FrameProcessorDynamic
 
 # #####################################################
 # ################ output directory ###################
@@ -48,16 +48,13 @@ logging.info(f"Device was set to: {device}")
 # initialize the gym environment
 env = gym.make("ALE/SpaceInvaders-v5", render_mode="human", frameskip=1)
 # env = gym.make("ALE/Carnival-v5", render_mode="human", frameskip=1)
-# env = gym.make("ALE/DemonAttack-v5", render_mode="human", frameskip=1)
 # env = gym.make("ALE/Galaxian-v5", render_mode="human", frameskip=1)
-
-
 
 # #####################################################
 # ################ init hyperparameter ################
 # #####################################################
-agent_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote_20241009/metrics/trial_21_DDQAugmentedNoisyTransformerNN_agent_hyper_params.yaml', 'r')
-network_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote_20241009/metrics/trial_21_DDQAugmentedNoisyTransformerNN_network_hyper_params.yaml', 'r')
+agent_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output/metrics/trial_19_DDQAugmentedNoisyTransformerNN_agent_hyper_params.yaml', 'r')
+network_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output/metrics/trial_19_DDQAugmentedNoisyTransformerNN_network_hyper_params.yaml', 'r')
 agent_hyper_params = yaml.load(agent_params_file, Loader=yaml.FullLoader)
 network_hyper_params = yaml.load(network_params_file, Loader=yaml.FullLoader)
 
@@ -110,7 +107,7 @@ trained_agent = DeepQNetworkAgentPrioritizedNoisy(policy_net=policy_net,
                                                   loss_function=loss_function)
 
 # load pre-trained model into agent
-trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output_remote_20241009/models/20241007_trial_21_DDQAugmentedNoisyTransformerNN_episode_658_score_0.33.pth', map_location=device)
+trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20241102_trial_19_DDQAugmentedNoisyTransformerNN_episode_874_score_0.3490.pth', map_location=device)
 
 output_size = network_hyper_params['input_shape'][1]
 
@@ -124,7 +121,7 @@ state = fp.preprocess(stacked_frames=None,
 while True:
     env.render()
     action, _, _ = trained_agent.act(state, eval_mode=True)
-    print(f'action: {action}')
+    # print(f'action: {action}')
     next_state, reward, terminated, truncated, info = env.step(action)
     score += reward
     state = fp.preprocess(stacked_frames=state,

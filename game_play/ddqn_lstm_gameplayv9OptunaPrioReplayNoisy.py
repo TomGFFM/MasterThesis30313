@@ -9,9 +9,9 @@ import torch
 import gym
 
 # import custom
-from agents import DeepQNetworkAgentPrioritized
+from agents import DeepQNetworkAgentPrioritizedNoisy
 from networks import DDQAugmentedNoisyLSTMNN
-from utils import FrameProcessor, LRSchedulerSelector, OptimizerSelector, LossFunctionSelector
+from utils import LRSchedulerSelector, OptimizerSelector, LossFunctionSelector, FrameProcessorDynamic
 
 # #####################################################
 # ################ output directory ###################
@@ -51,8 +51,8 @@ env = gym.make("ALE/SpaceInvaders-v5", render_mode="human", frameskip=1)
 # #####################################################
 # ################ init hyperparameter ################
 # #####################################################
-agent_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote_20241013_lstmonly/metrics/trial_21_DDQAugmentedNoisyLSTMNN_agent_hyper_params.yaml', 'r')
-network_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output_remote_20241013_lstmonly/metrics/trial_21_DDQAugmentedNoisyLSTMNN_network_hyper_params.yaml', 'r')
+agent_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output/metrics/trial_7_DDQAugmentedNoisyLSTMNN_agent_hyper_params.yaml', 'r')
+network_params_file = open('/Users/thomas/Repositories/MasterThesis30313/output/metrics/trial_7_DDQAugmentedNoisyLSTMNN_network_hyper_params.yaml', 'r')
 agent_hyper_params = yaml.load(agent_params_file, Loader=yaml.FullLoader)
 network_hyper_params = yaml.load(network_params_file, Loader=yaml.FullLoader)
 
@@ -89,24 +89,24 @@ loss_function = lfselector(agent_hyper_params=agent_hyper_params)
 # #####################################################
 
 # initialize frame processor for preprocess the game images and for stacking the frames
-fp = FrameProcessor()
+fp = FrameProcessorDynamic()
 
 # init agent
-trained_agent = DeepQNetworkAgentPrioritized(policy_net=policy_net,
-                                             target_net=None,
-                                             action_size=env.action_space.n,
-                                             device=device,
-                                             agent_hyper_params=agent_hyper_params,
-                                             network_hyper_params=network_hyper_params,
-                                             optimizer=optimizer,
-                                             lr_scheduler=lr_scheduler,
-                                             reward_shaping=False,
-                                             reward_factor=agent_hyper_params['reward_factor'],
-                                             punish_factor=agent_hyper_params['punish_factor'],
-                                             loss_function=loss_function)
+trained_agent = DeepQNetworkAgentPrioritizedNoisy(policy_net=policy_net,
+                                                  target_net=None,
+                                                  action_size=env.action_space.n,
+                                                  device=device,
+                                                  agent_hyper_params=agent_hyper_params,
+                                                  network_hyper_params=network_hyper_params,
+                                                  optimizer=optimizer,
+                                                  lr_scheduler=lr_scheduler,
+                                                  reward_shaping=False,
+                                                  reward_factor=agent_hyper_params['reward_factor'],
+                                                  punish_factor=agent_hyper_params['punish_factor'],
+                                                  loss_function=loss_function)
 
 # load pre-trained model into agent
-trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output_remote_20241013_lstmonly/models/20241010_trial_21_DDQAugmentedNoisyLSTMNN_episode_958_score_0.34.pth', map_location=device)
+trained_agent.load('/Users/thomas/Repositories/MasterThesis30313/output/models/20241105_trial_7_DDQAugmentedNoisyLSTMNN_episode_977_score_0.3585.pth', map_location=device)
 
 output_size = network_hyper_params['input_shape'][1]
 
