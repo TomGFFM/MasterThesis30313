@@ -106,4 +106,4 @@ To perform this activity to the folder ```output/optuna_study``` and perform the
 
 
 ## License
-This project is licensed under the terms of the [LICENSE](LICENSE).
+This project is licensed under the terms of the MIT [LICENSE](LICENSE).
