@@ -13,8 +13,8 @@ import gym
 # ################ init gym environment ###############
 # #####################################################
 # initialize the gym environment
-env = gym.make("ALE/Carnival-v5", render_mode="human", frameskip=1)
-# env = gym.make("ALE/Galaxian-v5", render_mode="human", frameskip=1)
+# env = gym.make("ALE/Carnival-v5", render_mode="human", frameskip=1)
+env = gym.make("ALE/Galaxian-v5", render_mode="human", frameskip=1)
 
 obs, info = env.reset()
 score = 0

@@ -12,5 +12,6 @@ tracker.py
 # Ignore the .idea directory and everything under it
 .idea/
 
-# Ignore the _old directory
+# Ignore some directories
 _old/
+/remote_server_scripts/
