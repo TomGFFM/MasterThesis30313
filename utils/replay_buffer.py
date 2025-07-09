@@ -146,10 +146,14 @@ class PrioritizedReplayBuffer:
         device (str): The device (e.g., 'cpu' or 'cuda') to use for tensor operations.
         experience (namedtuple): A named tuple for storing individual experiences.
         epsilon (float): A small value added to priorities to ensure non-zero sampling probability.
+        size (int): The current number of stored experiences.
     """
 
     def __init__(self, buffer_size: int, batch_size: int, device: str, alpha=0.6):
         """Initialize the PrioritizedReplayBuffer.
+
+        The buffer keeps track of its current size via ``self.size`` which
+        increments with each call to :meth:`push` up to ``buffer_size``.
 
         Args:
             buffer_size (int): The maximum number of experiences that can be stored.
@@ -172,10 +176,12 @@ class PrioritizedReplayBuffer:
                                      field_names=["state", "action", "reward", "next_state", "terminated", "truncated"])
         # Set a small epsilon to ensure non-zero priorities
         self.epsilon = 0.01
+        # Track the current number of experiences stored
+        self.size = 0
 
     def push(self, state: np.ndarray, action: Union[int, np.ndarray], reward: float, next_state: np.ndarray,
              terminated: bool, truncated: bool) -> None:
-        """Add a new experience to the buffer.
+        """Add a new experience to the buffer and update its size.
 
         Args:
             state (np.ndarray): The current state.
@@ -194,6 +200,8 @@ class PrioritizedReplayBuffer:
             max_priority = 1.0
         # Add the experience to the tree with max_priority
         self.tree.add(max_priority, experience)
+        # Update the current size up to the maximum buffer size
+        self.size = min(self.size + 1, self.buffer_size)
 
     def sample(self, beta=0.4):
         """Sample a batch of experiences from the buffer.
@@ -255,9 +263,9 @@ class PrioritizedReplayBuffer:
         """Return the current size of the buffer.
 
         Returns:
-            int: The number of experiences currently in the buffer.
+            int: The number of experiences currently stored.
         """
-        # Return the number of non-zero elements in the data array
-        return len(self.tree.data)
+        # Return the tracked size of the buffer
+        return self.size
 
 
